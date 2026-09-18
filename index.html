@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f2f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="noindex, nofollow">
+<title>Sales &amp; Inventory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ----------------------------------------------------------------
+   Colour lives here once, as light values. The dark block below
+   only redefines these same tokens, so the two themes cannot drift
+   apart. Nothing else in the sheet names a colour directly.
+
+   The palette follows the reference style: one saturated accent
+   (violet), white surfaces floating on a cool grey canvas, hairline
+   borders, and dual-layer soft shadows instead of hard edges.
+   ---------------------------------------------------------------- */
+:root{
+  --canvas:#f2f4f5;
+  --surface:#ffffff;
+  --surface-2:#f8f9fa;
+  --surface-sunk:#eef0f1;
+  --ink:#000000;
+  --ink-2:#3b3936;
+  --muted:#787574;
+  --muted-2:#a3a09e;
+  --border:#ebebeb;
+  --border-2:#e0e0e0;
+  --dark-surface:#332f2d;
+  --on-dark:#ffffff;
+
+  --accent:#5433eb;
+  --accent-edge:#4524db;
+  --accent-glow:#c0b5f3;
+  --accent-wash:#f0edfe;
+  --accent-line:#ddd6fb;
+
+  --good:#1f8f52;
+  --good-wash:#e8f6ee;
+  --warn:#9a6a1f;
+  --warn-wash:#fbf2e2;
+  --bad:#c2352c;
+  --bad-wash:#fdeeed;
+
+  --overlay:rgba(24,22,21,.42);
+  --shadow-card:0 4px 6px -1px rgba(0,0,0,.10), 0 2px 4px -2px rgba(0,0,0,.10);
+  --shadow-soft:0 2px 8px rgba(0,0,0,.06);
+  --shadow-float:0 18px 48px rgba(0,0,0,.18), 0 4px 12px rgba(0,0,0,.08);
+  --shadow-accent:0 4px 24px rgba(69,36,219,.34);
+
+  --font:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --r-card:28px;
+  --r-inner:20px;
+  --r-tile:16px;
+  --r-pill:9999px;
+  --rail:64px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --canvas:#111110;
+    --surface:#1b1a19;
+    --surface-2:#232120;
+    --surface-sunk:#141313;
+    --ink:#f6f5f4;
+    --ink-2:#d9d6d3;
+    --muted:#9d9a97;
+    --muted-2:#726e6b;
+    --border:#2c2a28;
+    --border-2:#3a3734;
+    --dark-surface:#2a2725;
+    --on-dark:#ffffff;
+
+    --accent:#8a6ffb;
+    --accent-edge:#7a5cf7;
+    --accent-glow:#3a2a7a;
+    --accent-wash:#221c3d;
+    --accent-line:#33285c;
+
+    --good:#4fb87c;
+    --good-wash:#162a1f;
+    --warn:#d9ab5f;
+    --warn-wash:#2e2415;
+    --bad:#e8675d;
+    --bad-wash:#2d1a18;
+
+    --overlay:rgba(0,0,0,.66);
+    --shadow-card:0 4px 6px -1px rgba(0,0,0,.45), 0 2px 4px -2px rgba(0,0,0,.4);
+    --shadow-soft:0 2px 8px rgba(0,0,0,.3);
+    --shadow-float:0 18px 48px rgba(0,0,0,.6), 0 4px 12px rgba(0,0,0,.4);
+    --shadow-accent:0 4px 24px rgba(122,92,247,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --canvas:#111110;
+  --surface:#1b1a19;
+  --surface-2:#232120;
+  --surface-sunk:#141313;
+  --ink:#f6f5f4;
+  --ink-2:#d9d6d3;
+  --muted:#9d9a97;
+  --muted-2:#726e6b;
+  --border:#2c2a28;
+  --border-2:#3a3734;
+  --dark-surface:#2a2725;
+  --on-dark:#ffffff;
+
+  --accent:#8a6ffb;
+  --accent-edge:#7a5cf7;
+  --accent-glow:#3a2a7a;
+  --accent-wash:#221c3d;
+  --accent-line:#33285c;
+
+  --good:#4fb87c;
+  --good-wash:#162a1f;
+  --warn:#d9ab5f;
+  --warn-wash:#2e2415;
+  --bad:#e8675d;
+  --bad-wash:#2d1a18;
+
+  --overlay:rgba(0,0,0,.66);
+  --shadow-card:0 4px 6px -1px rgba(0,0,0,.45), 0 2px 4px -2px rgba(0,0,0,.4);
+  --shadow-soft:0 2px 8px rgba(0,0,0,.3);
+  --shadow-float:0 18px 48px rgba(0,0,0,.6), 0 4px 12px rgba(0,0,0,.4);
+  --shadow-accent:0 4px 24px rgba(122,92,247,.3);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--canvas);
+  color:var(--ink);
+  font-family:var(--font);
+  font-weight:400;
+  font-size:16px;
+  line-height:1.33;
+  letter-spacing:-.031em;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+/* Hierarchy comes from size and negative tracking, never from bold. */
+h1,h2,h3,h4{font-weight:400;margin:0;letter-spacing:-.05em;line-height:1.1}
+button,input,select,textarea{font:inherit;letter-spacing:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+a{color:var(--accent);text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+[hidden]{display:none!important}
+
+/* ============================ shell ============================ */
+.app{min-height:100dvh;display:flex;flex-direction:column}
+
+/* --- top bar: brand + shop tabs --- */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:color-mix(in srgb, var(--canvas) 88%, transparent);
+  backdrop-filter:saturate(180%) blur(18px);
+  -webkit-backdrop-filter:saturate(180%) blur(18px);
+  border-bottom:1px solid transparent;
+  padding-top:env(safe-area-inset-top);
+  transition:border-color .2s;
+}
+.topbar.stuck{border-bottom-color:var(--border)}
+.topbar-in{
+  max-width:1200px;margin:0 auto;
+  padding:10px max(16px, env(safe-area-inset-left)) 10px max(16px, env(safe-area-inset-right));
+  display:flex;align-items:center;gap:12px;
+}
+.brand{display:flex;align-items:center;gap:9px;flex:none}
+.brand-mark{
+  width:30px;height:30px;border-radius:10px;flex:none;
+  background:var(--accent);color:#fff;
+  display:grid;place-items:center;
+  box-shadow:var(--shadow-accent);
+}
+.brand-mark svg{width:16px;height:16px}
+.brand-name{font-size:15px;letter-spacing:-.05em;white-space:nowrap}
+.brand-name span{color:var(--muted)}
+
+.tabs{
+  display:flex;align-items:center;gap:8px;
+  overflow-x:auto;scrollbar-width:none;
+  margin-left:auto;padding:2px;
+  -webkit-overflow-scrolling:touch;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:none;display:inline-flex;align-items:center;gap:7px;
+  height:38px;padding:0 16px;border-radius:var(--r-pill);
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--muted);font-size:14px;letter-spacing:-.017em;
+  box-shadow:var(--shadow-soft);
+  transition:color .15s, border-color .15s, background .15s, transform .12s;
+  white-space:nowrap;
+}
+.tab:active{transform:scale(.97)}
+.tab .dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.55;flex:none}
+.tab[aria-selected="true"]{
+  background:var(--ink);color:var(--surface);border-color:var(--ink);
+}
+:root[data-theme="dark"] .tab[aria-selected="true"],
+.tab[aria-selected="true"]{box-shadow:var(--shadow-card)}
+.tab[aria-selected="true"] .dot{opacity:1}
+.tab-add{
+  flex:none;width:38px;height:38px;border-radius:var(--r-pill);
+  background:var(--surface);border:1px dashed var(--border-2);color:var(--muted);
+  display:grid;place-items:center;transition:color .15s,border-color .15s,transform .12s;
+}
+.tab-add:hover{color:var(--accent);border-color:var(--accent-line)}
+.tab-add:active{transform:scale(.94)}
+.tab-add svg{width:15px;height:15px}
+
+/* --- desktop icon rail --- */
+.rail{display:none}
+
+/* --- main --- */
+main{
+  flex:1;width:100%;max-width:1200px;margin:0 auto;
+  padding:16px max(16px, env(safe-area-inset-left)) 120px max(16px, env(safe-area-inset-right));
+}
+.view{display:none;animation:rise .28s cubic-bezier(.22,1,.36,1)}
+.view.on{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.view-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:6px 2px 14px}
+.view-head h1{font-size:26px}
+.view-head p{margin:5px 0 0;font-size:13px;color:var(--muted);letter-spacing:-.017em;line-height:1.3}
+
+/* ============================ pieces ============================ */
+.card{
+  background:var(--surface);border-radius:var(--r-card);
+  box-shadow:var(--shadow-card);padding:20px;
+}
+.card + .card{margin-top:14px}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.card-head h2{font-size:19px}
+.card-head .sub{font-size:12px;color:var(--muted);letter-spacing:-.017em}
+
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.kpi{
+  background:var(--surface);border-radius:var(--r-inner);padding:15px 16px 16px;
+  box-shadow:var(--shadow-card);position:relative;overflow:hidden;
+}
+.kpi .lab{font-size:11px;color:var(--muted);letter-spacing:-.017em;display:flex;align-items:center;gap:6px}
+.kpi .lab svg{width:13px;height:13px;flex:none;opacity:.75}
+.kpi .val{font-size:25px;letter-spacing:-.05em;margin-top:9px;line-height:1.05;font-variant-numeric:tabular-nums}
+.kpi .foot{font-size:11px;color:var(--muted);margin-top:5px;letter-spacing:-.017em}
+.kpi.dark{background:var(--dark-surface);color:var(--on-dark)}
+.kpi.dark .lab,.kpi.dark .foot{color:rgba(255,255,255,.62)}
+.kpi.violet{background:var(--accent);color:#fff;box-shadow:var(--shadow-accent)}
+.kpi.violet .lab,.kpi.violet .foot{color:rgba(255,255,255,.72)}
+
+.pillrow{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.pillrow::-webkit-scrollbar{display:none}
+.pill{
+  flex:none;height:34px;padding:0 14px;border-radius:var(--r-pill);
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--muted);font-size:13px;letter-spacing:-.017em;
+  display:inline-flex;align-items:center;gap:6px;box-shadow:var(--shadow-soft);
+  transition:color .15s,border-color .15s,background .15s;white-space:nowrap;
+}
+.pill[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+
+.btn{
+  height:46px;padding:0 20px;border-radius:var(--r-pill);
+  background:var(--surface);border:1px solid var(--ink);color:var(--ink);
+  font-size:15px;letter-spacing:-.031em;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .12s,box-shadow .18s,opacity .15s;
+}
+.btn:active{transform:scale(.975)}
+.btn svg{width:16px;height:16px;flex:none}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:var(--shadow-accent)}
+.btn-ink{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.btn-ghost{border-color:var(--border-2);color:var(--muted);box-shadow:var(--shadow-soft)}
+.btn-danger{border-color:var(--bad);color:var(--bad);background:var(--surface)}
+.btn-sm{height:36px;padding:0 14px;font-size:13px;letter-spacing:-.017em}
+.btn-block{width:100%}
+.btn:disabled{opacity:.42;pointer-events:none}
+
+.iconbtn{
+  width:36px;height:36px;border-radius:var(--r-pill);flex:none;
+  display:grid;place-items:center;color:var(--muted);
+  border:1px solid var(--border);background:var(--surface);
+  transition:color .15s,border-color .15s,transform .12s;
+}
+.iconbtn:active{transform:scale(.94)}
+.iconbtn:hover{color:var(--ink)}
+.iconbtn svg{width:16px;height:16px}
+.iconbtn.bare{border-color:transparent;background:transparent;box-shadow:none}
+
+/* --- fields --- */
+.field{display:block;margin-bottom:13px}
+.field > .lab{display:block;font-size:12px;color:var(--muted);letter-spacing:-.017em;margin:0 0 6px 15px}
+.input,.select,textarea.input{
+  width:100%;height:48px;padding:0 17px;
+  background:var(--surface-2);border:1px solid var(--border);
+  border-radius:var(--r-pill);font-size:16px;letter-spacing:-.031em;
+  transition:border-color .15s,background .15s,box-shadow .18s;
+  appearance:none;-webkit-appearance:none;
+}
+textarea.input{height:auto;min-height:84px;padding:13px 17px;border-radius:var(--r-inner);resize:vertical;line-height:1.4}
+.input:focus,.select:focus,textarea.input:focus{
+  outline:none;border-color:var(--accent);background:var(--surface);
+  box-shadow:0 0 0 4px var(--accent-wash);
+}
+.input::placeholder{color:var(--muted-2)}
+.select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23787574' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 16px center;background-size:16px;
+  padding-right:42px;
+}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.searchwrap{position:relative;flex:1;min-width:0}
+.searchwrap .input{padding-left:44px}
+.searchwrap svg{
+  position:absolute;left:17px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;color:var(--muted-2);pointer-events:none;
+}
+
+/* --- list rows --- */
+.rows{display:flex;flex-direction:column;gap:2px}
+.row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border-radius:var(--r-tile);
+  background:transparent;width:100%;text-align:left;
+  transition:background .15s;
+}
+button.row:active{background:var(--surface-sunk)}
+.row + .row{box-shadow:inset 0 1px 0 var(--border)}
+.row-main{flex:1;min-width:0}
+.row-title{font-size:15px;letter-spacing:-.031em;display:flex;align-items:center;gap:7px}
+.row-title .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-sub{font-size:12px;color:var(--muted);letter-spacing:-.017em;margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-end{text-align:right;flex:none}
+.row-val{font-size:15px;letter-spacing:-.031em;font-variant-numeric:tabular-nums}
+.row-note{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:-.017em}
+.thumb{
+  width:42px;height:42px;border-radius:13px;flex:none;
+  background:var(--surface-sunk);color:var(--muted);
+  display:grid;place-items:center;font-size:14px;letter-spacing:-.05em;
+}
+/* An <svg> with no width/height falls back to its intrinsic 300x150, which
+   blew the cart glyph across the whole row. Every icon slot needs a size. */
+.thumb svg{width:18px;height:18px}
+
+.tag{
+  display:inline-flex;align-items:center;gap:4px;flex:none;
+  height:21px;padding:0 9px;border-radius:var(--r-pill);
+  font-size:11px;letter-spacing:-.017em;
+  background:var(--surface-sunk);color:var(--muted);
+}
+.tag.low{background:var(--warn-wash);color:var(--warn)}
+.tag.out{background:var(--bad-wash);color:var(--bad)}
+.tag.ok{background:var(--good-wash);color:var(--good)}
+.tag.violet{background:var(--accent-wash);color:var(--accent)}
+
+.daybar{
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding:14px 14px 7px;font-size:12px;color:var(--muted);letter-spacing:-.017em;
+}
+.daybar .tot{font-variant-numeric:tabular-nums;color:var(--ink-2)}
+
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+.empty .em-ic{
+  width:52px;height:52px;border-radius:var(--r-inner);margin:0 auto 12px;
+  background:var(--surface-sunk);display:grid;place-items:center;color:var(--muted-2);
+}
+.empty .em-ic svg{width:22px;height:22px}
+.empty h3{font-size:17px;color:var(--ink);margin-bottom:5px}
+.empty p{margin:0 auto;font-size:13px;max-width:34ch;letter-spacing:-.017em;line-height:1.4}
+.empty .btn{margin-top:16px}
+
+/* --- bottom nav (phone) --- */
+.nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:45;
+  background:color-mix(in srgb, var(--canvas) 86%, transparent);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-top:1px solid var(--border);
+  padding:6px max(10px, env(safe-area-inset-left)) calc(env(safe-area-inset-bottom) + 6px) max(10px, env(safe-area-inset-right));
+  display:flex;
+}
+.nav button{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:7px 2px;border-radius:14px;color:var(--muted);
+  font-size:10px;letter-spacing:-.017em;transition:color .15s,background .15s;
+}
+.nav button svg{width:21px;height:21px}
+.nav button[aria-current="page"]{color:var(--accent)}
+
+/* --- floating action --- */
+.fab{
+  position:fixed;right:max(18px, env(safe-area-inset-right));
+  bottom:calc(env(safe-area-inset-bottom) + 76px);z-index:44;
+  height:54px;padding:0 22px;border-radius:var(--r-pill);
+  background:var(--accent);color:#fff;box-shadow:var(--shadow-accent);
+  display:inline-flex;align-items:center;gap:9px;font-size:15px;letter-spacing:-.031em;
+  transition:transform .14s cubic-bezier(.22,1,.36,1),opacity .18s;
+}
+.fab:active{transform:scale(.95)}
+.fab svg{width:18px;height:18px}
+.fab[hidden]{display:none}
+
+/* --- sheets / modals --- */
+.scrim{
+  position:fixed;inset:0;z-index:60;background:var(--overlay);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  display:flex;align-items:flex-end;justify-content:center;
+  animation:fade .2s ease-out;
+}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{
+  width:100%;max-width:560px;max-height:92dvh;
+  background:var(--surface);
+  border-radius:var(--r-card) var(--r-card) 0 0;
+  box-shadow:var(--shadow-float);
+  display:flex;flex-direction:column;
+  animation:slideup .32s cubic-bezier(.22,1,.36,1);
+}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:none}}
+.sheet-grip{width:38px;height:4px;border-radius:2px;background:var(--border-2);margin:9px auto 0;flex:none}
+.sheet-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 20px 12px;flex:none;
+}
+.sheet-head h2{font-size:20px}
+.sheet-head .sub{font-size:12px;color:var(--muted);margin-top:3px;letter-spacing:-.017em}
+.sheet-body{
+  padding:2px 20px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;
+}
+.sheet-foot{
+  flex:none;padding:12px 20px calc(env(safe-area-inset-bottom) + 16px);
+  border-top:1px solid var(--border);display:flex;gap:10px;
+  background:var(--surface);border-radius:0 0 var(--r-card) var(--r-card);
+}
+.sheet-foot .btn{flex:1}
+
+/* --- cart lines in the sale sheet --- */
+.line{
+  display:flex;align-items:center;gap:11px;padding:10px 0;
+}
+.line + .line{box-shadow:inset 0 1px 0 var(--border)}
+.line-main{flex:1;min-width:0}
+.stepper{
+  display:inline-flex;align-items:center;gap:0;flex:none;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-pill);
+}
+.stepper button{width:32px;height:32px;display:grid;place-items:center;color:var(--muted);border-radius:var(--r-pill)}
+.stepper button:active{color:var(--accent)}
+.stepper button svg{width:14px;height:14px}
+.stepper .q{min-width:26px;text-align:center;font-size:14px;font-variant-numeric:tabular-nums}
+
+.totrow{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;font-size:14px;letter-spacing:-.017em}
+.totrow .k{color:var(--muted)}
+.totrow .v{font-variant-numeric:tabular-nums}
+.totrow.grand{font-size:21px;letter-spacing:-.05em;padding-top:12px;margin-top:5px;box-shadow:inset 0 1px 0 var(--border)}
+
+/* --- toast --- */
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(env(safe-area-inset-bottom) + 140px);z-index:90;
+  background:var(--dark-surface);color:var(--on-dark);
+  padding:12px 20px;border-radius:var(--r-pill);
+  font-size:14px;letter-spacing:-.017em;box-shadow:var(--shadow-float);
+  display:flex;align-items:center;gap:9px;max-width:calc(100vw - 32px);
+  animation:toastin .3s cubic-bezier(.22,1,.36,1);
+}
+@keyframes toastin{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
+.toast svg{width:16px;height:16px;flex:none}
+
+/* --- segmented --- */
+.seg{display:flex;background:var(--surface-sunk);border-radius:var(--r-pill);padding:3px;gap:3px}
+.seg button{
+  flex:1;height:34px;border-radius:var(--r-pill);font-size:13px;letter-spacing:-.017em;
+  color:var(--muted);transition:background .18s,color .18s;
+}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-soft)}
+
+/* --- bars (top items) --- */
+.bar{height:6px;border-radius:var(--r-pill);background:var(--surface-sunk);overflow:hidden;margin-top:7px}
+.bar i{display:block;height:100%;border-radius:var(--r-pill);background:var(--accent)}
+
+/* ============================ responsive ============================ */
+/* iPhone 16 Pro is 402pt wide, 16 Pro Max is 440pt — both land here. */
+@media (max-width:460px){
+  .kpi .val{font-size:23px}
+  .view-head h1{font-size:24px}
+  .brand-name{display:none}
+}
+@media (max-width:380px){
+  .kpis{gap:9px}
+  .card{padding:17px;border-radius:24px}
+}
+
+@media (min-width:900px){
+  body{padding-left:var(--rail)}
+  .nav{display:none}
+  .rail{
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    position:fixed;left:0;top:0;bottom:0;width:var(--rail);z-index:50;
+    padding:18px 0;background:var(--canvas);border-right:1px solid var(--border);
+  }
+  .rail button{
+    width:44px;height:44px;border-radius:var(--r-inner);
+    display:grid;place-items:center;color:var(--muted);
+    transition:background .16s,color .16s;position:relative;
+  }
+  .rail button svg{width:21px;height:21px}
+  .rail button:hover{background:var(--surface);color:var(--ink)}
+  .rail button[aria-current="page"]{background:var(--ink);color:var(--surface)}
+  .rail .spacer{flex:1}
+  .rail .tip{
+    position:absolute;left:54px;top:50%;transform:translateY(-50%) scale(.9);
+    background:var(--dark-surface);color:var(--on-dark);
+    padding:5px 11px;border-radius:var(--r-pill);font-size:12px;letter-spacing:-.017em;
+    white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .16s,transform .16s;
+    box-shadow:var(--shadow-soft);
+  }
+  .rail button:hover .tip{opacity:1;transform:translateY(-50%) scale(1)}
+  .fab{bottom:34px;right:34px}
+  main{padding-bottom:60px}
+  .kpis{grid-template-columns:repeat(4,1fr)}
+  .split{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;align-items:start}
+  .split .card + .card{margin-top:0}
+  .split > div > .card + .card{margin-top:14px}
+  .scrim{align-items:center;padding:24px}
+  .sheet{border-radius:var(--r-card);max-height:88dvh;animation:pop .28s cubic-bezier(.22,1,.36,1)}
+  .sheet-foot{border-radius:0 0 var(--r-card) var(--r-card);padding-bottom:16px}
+  @keyframes pop{from{opacity:0;transform:scale(.96) translateY(10px)}to{opacity:1;transform:none}}
+  .toast{bottom:34px;left:auto;right:34px;transform:none;animation:none}
+}
+@media (min-width:1100px){
+  .kpis{gap:14px}
+}
+
+/* --- print (reports) --- */
+@media print{
+  .topbar,.nav,.rail,.fab,.noprint{display:none!important}
+  body{background:#fff;padding:0}
+  main{padding:0;max-width:none}
+  .card{box-shadow:none;border:1px solid #ddd;break-inside:avoid;border-radius:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ icon sprite: stroked, 24-grid, 2px, round caps ============ -->
+<svg hidden aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+<defs>
+ <g id="s" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></g>
+</defs>
+<symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5"/><path d="M9.5 21v-6h5v6"/></symbol>
+<symbol id="i-sales" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8.5 12 3.5 3 8.5v7L12 20.5l9-5z"/><path d="M3 8.5 12 13.5l9-5"/><path d="M12 13.5v7"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></symbol>
+<symbol id="i-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 14.5a1.6 1.6 0 0 0 .32 1.77l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.6 1.6 0 0 0-1.77-.32 1.6 1.6 0 0 0-1 1.46V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1.05-1.46 1.6 1.6 0 0 0-1.77.32l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.6 1.6 0 0 0 .32-1.77 1.6 1.6 0 0 0-1.46-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.46-1.05 1.6 1.6 0 0 0-.32-1.77l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.6 1.6 0 0 0 1.77.32H9a1.6 1.6 0 0 0 1-1.46V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.46 1.6 1.6 0 0 0 1.77-.32l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.6 1.6 0 0 0-.32 1.77V9a1.6 1.6 0 0 0 1.46 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.46 1z"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2"/><path d="M6.5 7 7.4 20a1 1 0 0 0 1 .95h7.2a1 1 0 0 0 1-.95L17.5 7"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3z"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8.5v5"/><circle cx="12" cy="17" r=".9" fill="currentColor" stroke="none"/><path d="M10.3 3.9 2.6 17.5A2 2 0 0 0 4.3 20.5h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v13"/><path d="m6.5 11.5 5.5 5.5 5.5-5.5"/><path d="M4 20.5h16"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V7"/><path d="m6.5 12.5 5.5-5.5 5.5 5.5"/><path d="M4 3.5h16"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3.5h10V9"/><path d="M7 18H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M7 14.5h10v6H7z"/></symbol>
+<symbol id="i-store" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v9.5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V10"/><path d="M3 6.5 4.5 3.5h15L21 6.5a3 3 0 0 1-5.6 1.6 3 3 0 0 1-5.4 0A3 3 0 0 1 3 6.5z"/></symbol>
+<symbol id="i-peso" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20V4h5.5a4.2 4.2 0 0 1 0 8.4H7"/><path d="M5 8.5h11M5 12h11"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h11a5 5 0 0 1 0 10h-4"/><path d="m8 5-4 4 4 4"/></symbol>
+</svg>
+
+<div class="app">
+
+  <!-- desktop icon rail -->
+  <nav class="rail" aria-label="Sections">
+    <button data-go="overview" aria-current="page"><svg><use href="#i-home"/></svg><span class="tip">Overview</span></button>
+    <button data-go="sales"><svg><use href="#i-sales"/></svg><span class="tip">Sales</span></button>
+    <button data-go="inventory"><svg><use href="#i-box"/></svg><span class="tip">Inventory</span></button>
+    <button data-go="reports"><svg><use href="#i-chart"/></svg><span class="tip">Reports</span></button>
+    <div class="spacer"></div>
+    <button data-go="settings"><svg><use href="#i-cog"/></svg><span class="tip">Settings</span></button>
+  </nav>
+
+  <!-- shop tabs -->
+  <header class="topbar" id="topbar">
+    <div class="topbar-in">
+      <div class="brand">
+        <span class="brand-mark"><svg><use href="#i-store"/></svg></span>
+        <span class="brand-name">Sales <span>&amp; Inventory</span></span>
+      </div>
+      <div class="tabs" id="tabs" role="tablist" aria-label="Shops"></div>
+      <button class="tab-add" id="addShop" title="Add a shop" aria-label="Add a shop"><svg><use href="#i-plus"/></svg></button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ===================== OVERVIEW ===================== -->
+    <section class="view on" id="v-overview">
+      <div class="view-head">
+        <div><h1 id="ovTitle">Today</h1><p id="ovDate"></p></div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi violet">
+          <div class="lab"><svg><use href="#i-peso"/></svg>Sales today</div>
+          <div class="val" id="kSales">—</div>
+          <div class="foot" id="kSalesFoot">—</div>
+        </div>
+        <div class="kpi">
+          <div class="lab"><svg><use href="#i-up"/></svg>Profit today</div>
+          <div class="val" id="kProfit">—</div>
+          <div class="foot" id="kProfitFoot">—</div>
+        </div>
+        <div class="kpi">
+          <div class="lab"><svg><use href="#i-box"/></svg>Stock value</div>
+          <div class="val" id="kStock">—</div>
+          <div class="foot" id="kStockFoot">—</div>
+        </div>
+        <div class="kpi dark">
+          <div class="lab"><svg><use href="#i-alert"/></svg>Needs restock</div>
+          <div class="val" id="kLow">—</div>
+          <div class="foot" id="kLowFoot">—</div>
+        </div>
+      </div>
+
+      <div class="split" style="margin-top:14px">
+        <div>
+          <div class="card">
+            <div class="card-head">
+              <h2>Recent sales</h2>
+              <button class="btn btn-ghost btn-sm" data-go="sales">See all</button>
+            </div>
+            <div id="ovRecent"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-head">
+              <h2>Low stock</h2>
+              <span class="sub" id="ovLowSub"></span>
+            </div>
+            <div id="ovLow"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>This week</h2><span class="sub" id="ovWeekSub"></span></div>
+            <div id="ovWeek"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SALES ===================== -->
+    <section class="view" id="v-sales">
+      <div class="view-head">
+        <div><h1>Sales</h1><p id="salesSub"></p></div>
+      </div>
+      <div style="display:flex;gap:9px;margin-bottom:12px">
+        <label class="searchwrap"><svg><use href="#i-search"/></svg>
+          <input class="input" id="salesSearch" type="search" placeholder="Search a sale, item or note" autocomplete="off">
+        </label>
+      </div>
+      <div class="pillrow" id="salesRange" style="margin-bottom:12px">
+        <button class="pill" data-range="today" aria-pressed="true">Today</button>
+        <button class="pill" data-range="week">This week</button>
+        <button class="pill" data-range="month">This month</button>
+        <button class="pill" data-range="all">All</button>
+      </div>
+      <div class="card" style="padding:8px 6px"><div id="salesList"></div></div>
+    </section>
+
+    <!-- ===================== INVENTORY ===================== -->
+    <section class="view" id="v-inventory">
+      <div class="view-head">
+        <div><h1>Inventory</h1><p id="invSub"></p></div>
+      </div>
+      <div style="display:flex;gap:9px;margin-bottom:12px">
+        <label class="searchwrap"><svg><use href="#i-search"/></svg>
+          <input class="input" id="invSearch" type="search" placeholder="Search an item or SKU" autocomplete="off">
+        </label>
+      </div>
+      <div class="pillrow" id="invFilters" style="margin-bottom:12px"></div>
+      <div class="card" style="padding:8px 6px"><div id="invList"></div></div>
+    </section>
+
+    <!-- ===================== REPORTS ===================== -->
+    <section class="view" id="v-reports">
+      <div class="view-head">
+        <div><h1>Reports</h1><p id="repSub"></p></div>
+        <button class="btn btn-ghost btn-sm noprint" id="repPrint"><svg><use href="#i-print"/></svg>Print</button>
+      </div>
+      <div class="pillrow" id="repRange" style="margin-bottom:12px">
+        <button class="pill" data-range="today">Today</button>
+        <button class="pill" data-range="week" aria-pressed="true">This week</button>
+        <button class="pill" data-range="month">This month</button>
+        <button class="pill" data-range="year">This year</button>
+        <button class="pill" data-range="all">All time</button>
+      </div>
+      <div class="kpis">
+        <div class="kpi violet"><div class="lab">Revenue</div><div class="val" id="rRev">—</div><div class="foot" id="rRevFoot">—</div></div>
+        <div class="kpi"><div class="lab">Profit</div><div class="val" id="rProf">—</div><div class="foot" id="rProfFoot">—</div></div>
+        <div class="kpi"><div class="lab">Sales</div><div class="val" id="rCount">—</div><div class="foot" id="rCountFoot">—</div></div>
+        <div class="kpi dark"><div class="lab">Units sold</div><div class="val" id="rUnits">—</div><div class="foot" id="rUnitsFoot">—</div></div>
+      </div>
+      <div class="split" style="margin-top:14px">
+        <div class="card">
+          <div class="card-head"><h2>Best sellers</h2><span class="sub">by revenue</span></div>
+          <div id="rTop"></div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-head"><h2>Payment</h2></div>
+            <div id="rPay"></div>
+          </div>
+          <div class="card noprint">
+            <div class="card-head"><h2>Export</h2></div>
+            <p style="margin:0 0 14px;font-size:13px;color:var(--muted);letter-spacing:-.017em">A spreadsheet of every sale in the period above, one row per item line.</p>
+            <button class="btn btn-ink btn-block" id="repCsv"><svg><use href="#i-down"/></svg>Download CSV</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SETTINGS ===================== -->
+    <section class="view" id="v-settings">
+      <div class="view-head"><div><h1>Settings</h1><p>Shops, money and your backup.</p></div></div>
+
+      <div class="card">
+        <div class="card-head"><h2>Shops</h2><button class="btn btn-ghost btn-sm" id="addShop2"><svg><use href="#i-plus"/></svg>Add</button></div>
+        <div id="shopList"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>This shop</h2><span class="sub" id="setShopName"></span></div>
+        <label class="field"><span class="lab">Currency symbol</span>
+          <input class="input" id="setCurrency" maxlength="4" placeholder="₱"></label>
+        <label class="field"><span class="lab">Low-stock warning at or below</span>
+          <input class="input" id="setReorder" type="number" min="0" inputmode="numeric" placeholder="5"></label>
+        <label class="field" style="margin-bottom:0"><span class="lab">Payment methods, comma separated</span>
+          <input class="input" id="setPayments" placeholder="Cash, GCash, Card"></label>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Appearance</h2></div>
+        <div class="seg" id="themeSeg">
+          <button data-theme="auto" aria-pressed="true">Auto</button>
+          <button data-theme="light">Light</button>
+          <button data-theme="dark">Dark</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Backup</h2></div>
+        <p style="margin:0 0 14px;font-size:13px;color:var(--muted);letter-spacing:-.017em;line-height:1.4">
+          Everything lives in this browser only. Nothing is sent anywhere. Download a
+          copy now and then, and keep it somewhere safe — clearing your browser data
+          erases the lot.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-ink" id="expJson"><svg><use href="#i-down"/></svg>Download backup</button>
+          <button class="btn btn-ghost" id="impJson"><svg><use href="#i-up"/></svg>Restore</button>
+        </div>
+        <input type="file" id="impFile" accept="application/json,.json" hidden>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Danger</h2></div>
+        <p style="margin:0 0 14px;font-size:13px;color:var(--muted);letter-spacing:-.017em;line-height:1.4">
+          Deletes every shop, item and sale in this browser. There is no undo.</p>
+        <button class="btn btn-danger" id="wipe"><svg><use href="#i-trash"/></svg>Erase everything</button>
+        <p style="margin:18px 0 0;font-size:11px;color:var(--muted-2);letter-spacing:-.017em" id="verLine"></p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- phone nav -->
+  <nav class="nav" aria-label="Sections">
+    <button data-go="overview" aria-current="page"><svg><use href="#i-home"/></svg>Overview</button>
+    <button data-go="sales"><svg><use href="#i-sales"/></svg>Sales</button>
+    <button data-go="inventory"><svg><use href="#i-box"/></svg>Stock</button>
+    <button data-go="reports"><svg><use href="#i-chart"/></svg>Reports</button>
+    <button data-go="settings"><svg><use href="#i-cog"/></svg>Settings</button>
+  </nav>
+
+  <button class="fab" id="fab" hidden></button>
+</div>
+
+<div id="sheetHost"></div>
+<div id="toastHost"></div>
+
+<script src="config.js"></script>
+<script type="module">
+/* ===========================================================================
+   Sales & Inventory
+   One page, two data adapters, no build step.
+
+   The shape here is deliberate and worth keeping: `db` is the ONLY thing that
+   knows whether the rows came from Supabase or from this device. Everything
+   above it — totals, profit, stock warnings, reports — is computed in plain JS
+   off one snapshot, so the two adapters cannot quietly drift apart.
+   =========================================================================== */
+
+const CFG = window.SALESINV_CONFIG || {};
+const T   = n => (CFG.tablePrefix || 'salesinv_') + n;
+const LS  = { data:'salesinv.local.v1', mode:'salesinv.mode', ui:'salesinv.ui.v1', theme:'salesinv.theme' };
+
+/* ----------------------------------------------------------------- dom ---- */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+function el(tag, props, ...kids){
+  const n = document.createElement(tag);
+  if (props) for (const [k,v] of Object.entries(props)){
+    if (v === null || v === undefined || v === false) continue;
+    if (k === 'class') n.className = v;
+    else if (k === 'html') n.innerHTML = v;
+    else if (k === 'text') n.textContent = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (k === 'dataset') Object.assign(n.dataset, v);
+    else n.setAttribute(k, v === true ? '' : v);
+  }
+  // Flatten and drop empties — replaceChildren(null) would print "null".
+  for (const k of kids.flat(3)){
+    if (k === null || k === undefined || k === false || k === '') continue;
+    n.append(k.nodeType ? k : document.createTextNode(String(k)));
+  }
+  return n;
+}
+function icon(id, cls){
+  const s = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  if (cls) s.setAttribute('class', cls);
+  const u = document.createElementNS('http://www.w3.org/2000/svg','use');
+  u.setAttribute('href','#i-'+id); s.append(u); return s;
+}
+function fill(host, ...kids){ host.replaceChildren(...kids.flat(3).filter(Boolean)); }
+
+/* --------------------------------------------------------------- money ---- */
+const n2 = v => Math.round((Number(v)||0)*100)/100;
+function money(v, sym){
+  const s = sym ?? (shop()?.currency || '₱');
+  const neg = v < 0;
+  const t = Math.abs(n2(v)).toLocaleString('en-PH',{minimumFractionDigits:2, maximumFractionDigits:2});
+  return (neg?'−':'') + s + t;
+}
+const qty = v => { const x = n2(v); return Number.isInteger(x) ? String(x)
+  : x.toLocaleString('en-PH',{maximumFractionDigits:2}); };
+
+/* ---------------------------------------------------------------- time ---- */
+const pad = n => String(n).padStart(2,'0');
+const dayKey = d => { const x = new Date(d); return `${x.getFullYear()}-${pad(x.getMonth()+1)}-${pad(x.getDate())}`; };
+function startOfDay(d){ const x = new Date(d); x.setHours(0,0,0,0); return x; }
+function startOfWeek(d){                      // Monday, the way he counts weeks
+  const x = startOfDay(d); const off = (x.getDay() + 6) % 7;
+  x.setDate(x.getDate() - off); return x;
+}
+const startOfMonth = d => { const x = startOfDay(d); x.setDate(1); return x; };
+const startOfYear  = d => { const x = startOfDay(d); x.setMonth(0,1); return x; };
+
+function rangeStart(key){
+  const now = new Date();
+  if (key === 'today') return startOfDay(now);
+  if (key === 'week')  return startOfWeek(now);
+  if (key === 'month') return startOfMonth(now);
+  if (key === 'year')  return startOfYear(now);
+  return new Date(0);
+}
+const fmtDay = ts => new Date(ts).toLocaleDateString('en-PH',{weekday:'short', day:'numeric', month:'short'});
+const fmtTime = ts => new Date(ts).toLocaleTimeString('en-PH',{hour:'numeric', minute:'2-digit'});
+function dayLabel(key){
+  const t = dayKey(new Date());
+  const y = dayKey(new Date(Date.now() - 864e5));
+  if (key === t) return 'Today';
+  if (key === y) return 'Yesterday';
+  return fmtDay(key + 'T12:00:00');
+}
+const uid = () => (crypto.randomUUID ? crypto.randomUUID()
+  : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random()*16|0; return (c === 'x' ? r : (r&0x3|0x8)).toString(16); }));
+
+/* =====================================================================
+   The snapshot. Everything on screen is derived from this and nothing else.
+   ===================================================================== */
+let S = { shops:[], items:[], sales:[], lines:[], movements:[] };
+let db = null;              // the active adapter
+let session = null;         // supabase session, remote mode only
+let sb = null;              // supabase client
+
+const UI = Object.assign({
+  shop:null, view:'overview',
+  salesRange:'today', repRange:'week',
+  invFilter:'all', invQuery:'', salesQuery:'',
+}, JSON.parse(localStorage.getItem(LS.ui) || '{}'));
+const saveUI = () => localStorage.setItem(LS.ui, JSON.stringify(UI));
+
+const shop  = () => S.shops.find(s => s.id === UI.shop) || S.shops[0] || null;
+const items = () => S.items.filter(i => i.shop_id === UI.shop && !i.archived);
+const sales = () => S.sales.filter(s => s.shop_id === UI.shop);
+const linesOf = id => S.lines.filter(l => l.sale_id === id);
+const itemById = id => S.items.find(i => i.id === id);
+const lowAt = it => (it.reorder_at ?? shop()?.low_stock_at ?? 5);
+const isLow = it => n2(it.stock) <= lowAt(it);
+const payments = () => (shop()?.payment_methods?.length ? shop().payment_methods : ['Cash','GCash','Card']);
+
+/* =====================================================================
+   Adapter 1 — this device only (localStorage).
+   Reads hand back structuredClone copies. That matters: an earlier app of
+   his handed back the same object it had persisted, so a stock delta got
+   applied to one shared object twice and every movement counted double.
+   ===================================================================== */
+const localDb = {
+  mode:'local',
+  _read(){
+    const raw = localStorage.getItem(LS.data);
+    const d = raw ? JSON.parse(raw) : null;
+    return d || { shops:[], items:[], sales:[], lines:[], movements:[] };
+  },
+  _write(d){ localStorage.setItem(LS.data, JSON.stringify(d)); },
+
+  async load(){
+    let d = this._read();
+    if (!d.shops.length){                                  // first run: his two
+      d.shops = [
+        { id:uid(), name:'Project Drex', sort:0, currency:'₱', low_stock_at:5,
+          payment_methods:['Cash','GCash','Card'], archived:false, created_at:new Date().toISOString() },
+        { id:uid(), name:'Mixel', sort:1, currency:'₱', low_stock_at:5,
+          payment_methods:['Cash','GCash','Card'], archived:false, created_at:new Date().toISOString() },
+      ];
+      this._write(d);
+    }
+    return structuredClone(d);
+  },
+  async addShop(s){ const d = this._read(); d.shops.push(s); this._write(d); },
+  async updateShop(id, patch){ const d = this._read();
+    const s = d.shops.find(x => x.id === id); if (s) Object.assign(s, patch); this._write(d); },
+  async deleteShop(id){ const d = this._read();
+    d.shops = d.shops.filter(s => s.id !== id);
+    const gone = new Set(d.items.filter(i => i.shop_id === id).map(i => i.id));
+    d.items = d.items.filter(i => i.shop_id !== id);
+    const sgone = new Set(d.sales.filter(s => s.shop_id === id).map(s => s.id));
+    d.sales = d.sales.filter(s => s.shop_id !== id);
+    d.lines = d.lines.filter(l => !sgone.has(l.sale_id));
+    d.movements = d.movements.filter(m => !gone.has(m.item_id));
+    this._write(d);
+  },
+
+  async addItem(it){ const d = this._read(); d.items.push({ ...it, stock:0 }); this._write(d); },
+  async updateItem(id, patch){ const d = this._read();
+    const i = d.items.find(x => x.id === id);
+    if (i){ const { stock, ...safe } = patch; Object.assign(i, safe, { updated_at:new Date().toISOString() }); }
+    this._write(d);
+  },
+  async deleteItem(id){ const d = this._read();
+    d.items = d.items.filter(i => i.id !== id);
+    d.movements = d.movements.filter(m => m.item_id !== id);
+    this._write(d);
+  },
+
+  // The one writer of stock on this side, mirroring the SQL trigger.
+  async addMovements(ms){ const d = this._read();
+    for (const m of ms){
+      d.movements.push(m);
+      const it = d.items.find(i => i.id === m.item_id);
+      if (it) it.stock = n2(it.stock + m.delta);
+    }
+    this._write(d);
+  },
+  async addSale(sale, lines, movements){ const d = this._read();
+    d.sales.push(sale); d.lines.push(...lines);
+    for (const m of movements){
+      d.movements.push(m);
+      const it = d.items.find(i => i.id === m.item_id);
+      if (it) it.stock = n2(it.stock + m.delta);
+    }
+    this._write(d);
+  },
+  async deleteSale(id){ const d = this._read();
+    for (const m of d.movements.filter(m => m.sale_id === id)){   // cascade, by hand
+      const it = d.items.find(i => i.id === m.item_id);
+      if (it) it.stock = n2(it.stock - m.delta);
+    }
+    d.movements = d.movements.filter(m => m.sale_id !== id);
+    d.lines = d.lines.filter(l => l.sale_id !== id);
+    d.sales = d.sales.filter(s => s.id !== id);
+    this._write(d);
+  },
+  async replaceAll(d){ this._write(d); },
+};
+
+/* =====================================================================
+   Adapter 2 — Supabase. Same surface, same promises.
+   Note what it does NOT do: no joins, no aggregates. It hands back rows.
+   ===================================================================== */
+function remoteDb(client){
+  const pick = (r) => { if (r.error) throw r.error; return r.data || []; };
+  return {
+    mode:'remote',
+    async load(){
+      const [shops, items, sales, lines, movements] = await Promise.all([
+        client.from(T('shops')).select('*').order('sort').then(pick),
+        client.from(T('items')).select('*').order('name').then(pick),
+        client.from(T('sales')).select('*').order('sold_at',{ascending:false}).limit(4000).then(pick),
+        client.from(T('sale_lines')).select('*').limit(20000).then(pick),
+        client.from(T('movements')).select('*').order('created_at',{ascending:false}).limit(20000).then(pick),
+      ]);
+      return { shops, items, sales, lines, movements };
+    },
+    async addShop(s){ const { id, ...rest } = s;
+      const r = await client.from(T('shops')).insert(rest); if (r.error) throw r.error; },
+    async updateShop(id, patch){
+      const r = await client.from(T('shops')).update(patch).eq('id', id); if (r.error) throw r.error; },
+    async deleteShop(id){
+      const r = await client.from(T('shops')).delete().eq('id', id); if (r.error) throw r.error; },
+
+    async addItem(it){ const { stock, ...rest } = it;   // stock belongs to the trigger
+      const r = await client.from(T('items')).insert(rest); if (r.error) throw r.error; },
+    async updateItem(id, patch){ const { stock, ...safe } = patch;
+      const r = await client.from(T('items')).update(safe).eq('id', id); if (r.error) throw r.error; },
+    async deleteItem(id){
+      const r = await client.from(T('items')).delete().eq('id', id); if (r.error) throw r.error; },
+
+    async addMovements(ms){
+      const r = await client.from(T('movements')).insert(ms.map(({id, ...m}) => m));
+      if (r.error) throw r.error; },
+    async addSale(sale, lines, movements){
+      const { id, ...srest } = sale;
+      const ins = await client.from(T('sales')).insert(srest).select('id').single();
+      if (ins.error) throw ins.error;
+      const saleId = ins.data.id;
+      if (lines.length){
+        const r = await client.from(T('sale_lines'))
+          .insert(lines.map(({id, sale_id, ...l}) => ({ ...l, sale_id:saleId })));
+        if (r.error) throw r.error;
+      }
+      if (movements.length){
+        const r = await client.from(T('movements'))
+          .insert(movements.map(({id, sale_id, ...m}) => ({ ...m, sale_id:saleId })));
+        if (r.error) throw r.error;
+      }
+    },
+    async deleteSale(id){                    // lines + movements cascade in SQL
+      const r = await client.from(T('sales')).delete().eq('id', id); if (r.error) throw r.error; },
+  };
+}
+
+/* =====================================================================
+   Chrome: toasts, sheets, confirmations
+   ===================================================================== */
+let toastTimer = null;
+function toast(msg, kind){
+  clearTimeout(toastTimer);
+  const t = el('div',{class:'toast', role:'status'},
+    icon(kind === 'bad' ? 'alert' : 'check'), el('span',{text:msg}));
+  fill($('#toastHost'), t);
+  toastTimer = setTimeout(() => $('#toastHost').replaceChildren(), 2600);
+}
+
+const sheets = [];
+function openSheet({ title, sub, body, foot, onClose }){
+  const scrim = el('div',{class:'scrim'});
+  const close = () => {
+    const i = sheets.indexOf(h); if (i > -1) sheets.splice(i,1);
+    scrim.remove(); onClose?.();
+    if (!sheets.length) document.body.style.overflow = '';
+  };
+  const h = { close, scrim };
+  const sheet = el('div',{class:'sheet', role:'dialog','aria-modal':'true','aria-label':title},
+    el('div',{class:'sheet-grip'}),
+    el('div',{class:'sheet-head'},
+      el('div',{}, el('h2',{text:title}), sub ? el('div',{class:'sub', text:sub}) : null),
+      el('button',{class:'iconbtn bare', 'aria-label':'Close', onclick:close}, icon('x'))),
+    el('div',{class:'sheet-body'}, body),
+    foot ? el('div',{class:'sheet-foot'}, foot) : null);
+  scrim.append(sheet);
+  scrim.addEventListener('mousedown', e => { if (e.target === scrim) close(); });
+  $('#sheetHost').append(scrim);
+  document.body.style.overflow = 'hidden';
+  sheets.push(h);
+  h.bodyEl = sheet.querySelector('.sheet-body');
+  h.footEl = sheet.querySelector('.sheet-foot');
+  return h;
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && sheets.length) sheets[sheets.length-1].close();
+});
+
+function ask({ title, text, ok='Confirm', danger=false }){
+  return new Promise(resolve => {
+    let done = false;
+    const finish = v => { done = true; h.close(); resolve(v); };
+    const h = openSheet({
+      title,
+      body: el('p',{ style:'margin:2px 2px 8px;font-size:14px;color:var(--muted);line-height:1.45', text }),
+      foot: [ el('button',{class:'btn btn-ghost', onclick:() => finish(false)}, 'Cancel'),
+              el('button',{class:'btn ' + (danger ? 'btn-danger' : 'btn-accent'),
+                           onclick:() => finish(true)}, ok) ],
+      onClose: () => { if (!done) resolve(false); },
+    });
+  });
+}
+
+/* Small builders used by the sheets */
+function field(label, input){ return el('label',{class:'field'}, el('span',{class:'lab', text:label}), input); }
+function input(props){ return el('input', Object.assign({class:'input'}, props)); }
+function selectOf(opts, value, props){
+  return el('select', Object.assign({class:'select'}, props),
+    ...opts.map(o => {
+      const [v,l] = Array.isArray(o) ? o : [o,o];
+      return el('option', { value:v, selected:String(v) === String(value) || null }, l);
+    }));
+}
+function emptyState(ic, title, text, action){
+  return el('div',{class:'empty'},
+    el('div',{class:'em-ic'}, icon(ic)),
+    el('h3',{text:title}), el('p',{text}), action || null);
+}
+
+/* =====================================================================
+   Shop tabs
+   ===================================================================== */
+function renderTabs(){
+  const host = $('#tabs');
+  fill(host, ...S.shops.map(s =>
+    el('button',{
+      class:'tab', role:'tab', 'aria-selected':String(s.id === UI.shop),
+      onclick:() => { UI.shop = s.id; saveUI(); renderTabs(); renderAll(); },
+    }, el('span',{class:'dot'}), s.name)));
+  // A newly added shop lands off the right edge of the strip otherwise.
+  host.querySelector('[aria-selected="true"]')
+      ?.scrollIntoView({ block:'nearest', inline:'nearest' });
+}
+
+/* =====================================================================
+   Overview
+   ===================================================================== */
+function renderOverview(){
+  const today = startOfDay(new Date()).getTime();
+  const wkStart = startOfWeek(new Date()).getTime();
+  const mine = sales();
+  const todays = mine.filter(s => new Date(s.sold_at).getTime() >= today);
+  const week = mine.filter(s => new Date(s.sold_at).getTime() >= wkStart);
+  const its = items();
+
+  const sum = (a, f) => a.reduce((t,x) => t + (Number(f(x))||0), 0);
+  const tSales = sum(todays, s => s.total);
+  const tProfit = sum(todays, s => s.profit);
+  const stockVal = sum(its, i => i.stock * i.cost);
+  const low = its.filter(isLow);
+  const out = low.filter(i => n2(i.stock) <= 0);
+
+  $('#ovTitle').textContent = shop() ? shop().name : 'Today';
+  $('#ovDate').textContent = new Date().toLocaleDateString('en-PH',
+    { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  $('#kSales').textContent = money(tSales);
+  $('#kSalesFoot').textContent = todays.length
+    ? `${todays.length} sale${todays.length>1?'s':''} · avg ${money(tSales/todays.length)}`
+    : 'Nothing rung up yet';
+  $('#kProfit').textContent = money(tProfit);
+  $('#kProfitFoot').textContent = tSales > 0
+    ? `${Math.round(tProfit/tSales*100)}% margin` : 'After cost of goods';
+  $('#kStock').textContent = money(stockVal);
+  $('#kStockFoot').textContent = `${its.length} item${its.length===1?'':'s'} at cost`;
+  $('#kLow').textContent = String(low.length);
+  $('#kLowFoot').textContent = out.length ? `${out.length} already out` : 'At or below the warning level';
+
+  // recent
+  const recent = mine.slice().sort((a,b) => new Date(b.sold_at) - new Date(a.sold_at)).slice(0,6);
+  fill($('#ovRecent'), recent.length
+    ? el('div',{class:'rows'}, ...recent.map(saleRow))
+    : emptyState('sales','No sales yet','Ring one up and it will show here, and come off your stock.',
+        el('button',{class:'btn btn-accent', onclick:() => saleSheet()}, icon('plus'),'New sale')));
+
+  // low stock
+  $('#ovLowSub').textContent = low.length ? `${low.length} to reorder` : 'all good';
+  fill($('#ovLow'), low.length
+    ? el('div',{class:'rows'}, ...low.slice(0,8).sort((a,b)=>a.stock-b.stock).map(itemRow))
+    : emptyState('check','Nothing to reorder','Every item is above its warning level.'));
+
+  // this week, by day
+  const byDay = new Map();
+  for (const s of week){
+    const k = dayKey(s.sold_at);
+    byDay.set(k, (byDay.get(k) || 0) + (Number(s.total)||0));
+  }
+  const days = [];
+  for (let d = new Date(wkStart); d <= new Date(); d.setDate(d.getDate()+1)){
+    days.push([dayKey(d), byDay.get(dayKey(d)) || 0]);
+  }
+  const top = Math.max(1, ...days.map(d => d[1]));
+  const wkTotal = days.reduce((t,d) => t + d[1], 0);
+  $('#ovWeekSub').textContent = money(wkTotal);
+  fill($('#ovWeek'), el('div',{class:'rows'}, ...days.map(([k,v]) =>
+    el('div',{class:'row', style:'padding-left:2px;padding-right:2px'},
+      el('div',{class:'row-main'},
+        el('div',{class:'row-title'}, el('span',{class:'name', text:dayLabel(k)})),
+        el('div',{class:'bar'}, el('i',{style:`width:${Math.max(2, v/top*100)}%`}))),
+      el('div',{class:'row-end'}, el('div',{class:'row-val', text:v ? money(v) : '—'}))))));
+}
+
+/* =====================================================================
+   Rows shared between views
+   ===================================================================== */
+function saleRow(s){
+  const ls = linesOf(s.id);
+  const units = ls.reduce((t,l) => t + (Number(l.qty)||0), 0);
+  const names = ls.map(l => `${qty(l.qty)}× ${l.name}`).join(', ');
+  return el('button',{class:'row', onclick:() => saleDetail(s)},
+    el('div',{class:'thumb'}, icon('sales')),
+    el('div',{class:'row-main'},
+      el('div',{class:'row-title'},
+        el('span',{class:'name', text:names || 'Sale'}),
+        s.payment ? el('span',{class:'tag', text:s.payment}) : null),
+      el('div',{class:'row-sub',
+        text:`${fmtTime(s.sold_at)} · ${qty(units)} item${units===1?'':'s'}${s.note ? ' · '+s.note : ''}`})),
+    el('div',{class:'row-end'},
+      el('div',{class:'row-val', text:money(s.total)}),
+      el('div',{class:'row-note', text:`+${money(s.profit)}`})));
+}
+
+function itemRow(it){
+  const out = n2(it.stock) <= 0, low = isLow(it);
+  return el('button',{class:'row', onclick:() => itemSheet(it)},
+    el('div',{class:'thumb', text:(it.name||'?').trim().charAt(0).toUpperCase()}),
+    el('div',{class:'row-main'},
+      el('div',{class:'row-title'},
+        el('span',{class:'name', text:it.name}),
+        out ? el('span',{class:'tag out', text:'Out'})
+            : low ? el('span',{class:'tag low', text:'Low'}) : null),
+      el('div',{class:'row-sub',
+        text:[it.sku, it.category, `cost ${money(it.cost)}`].filter(Boolean).join(' · ')})),
+    el('div',{class:'row-end'},
+      el('div',{class:'row-val', text:money(it.price)}),
+      el('div',{class:'row-note', text:`${qty(it.stock)} in stock`})));
+}
+
+/* =====================================================================
+   Sales view
+   ===================================================================== */
+function renderSales(){
+  const from = rangeStart(UI.salesRange).getTime();
+  const q = UI.salesQuery.trim().toLowerCase();
+  let list = sales().filter(s => new Date(s.sold_at).getTime() >= from);
+  if (q) list = list.filter(s => {
+    const hay = [s.note, s.payment, ...linesOf(s.id).map(l => l.name)].filter(Boolean).join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+  list.sort((a,b) => new Date(b.sold_at) - new Date(a.sold_at));
+
+  const total = list.reduce((t,s) => t + (Number(s.total)||0), 0);
+  const profit = list.reduce((t,s) => t + (Number(s.profit)||0), 0);
+  $('#salesSub').textContent = list.length
+    ? `${list.length} sale${list.length===1?'':'s'} · ${money(total)} · ${money(profit)} profit`
+    : 'Nothing in this period';
+
+  $$('#salesRange .pill').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.range === UI.salesRange)));
+
+  if (!list.length){
+    fill($('#salesList'), emptyState('sales', q ? 'No match' : 'No sales here',
+      q ? 'Try another word, or widen the period.' : 'Pick a wider period, or ring one up.',
+      q ? null : el('button',{class:'btn btn-accent', onclick:() => saleSheet()}, icon('plus'),'New sale')));
+    return;
+  }
+  const groups = new Map();
+  for (const s of list){
+    const k = dayKey(s.sold_at);
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(s);
+  }
+  fill($('#salesList'), ...Array.from(groups, ([k, ss]) => el('div',{},
+    el('div',{class:'daybar'},
+      el('span',{text:dayLabel(k)}),
+      el('span',{class:'tot', text:money(ss.reduce((t,s) => t + (Number(s.total)||0), 0))})),
+    el('div',{class:'rows'}, ...ss.map(saleRow)))));
+}
+
+/* =====================================================================
+   Inventory view
+   ===================================================================== */
+function renderInventory(){
+  const its = items();
+  const cats = Array.from(new Set(its.map(i => i.category).filter(Boolean))).sort();
+  const filters = [['all','All'], ['low','Low'], ['out','Out'], ...cats.map(c => ['cat:'+c, c])];
+  fill($('#invFilters'), ...filters.map(([v,l]) =>
+    el('button',{class:'pill', 'aria-pressed':String(UI.invFilter === v),
+      onclick:() => { UI.invFilter = v; saveUI(); renderInventory(); }}, l)));
+
+  const q = UI.invQuery.trim().toLowerCase();
+  let list = its.slice();
+  if (UI.invFilter === 'low') list = list.filter(isLow);
+  else if (UI.invFilter === 'out') list = list.filter(i => n2(i.stock) <= 0);
+  else if (UI.invFilter.startsWith('cat:')) list = list.filter(i => i.category === UI.invFilter.slice(4));
+  if (q) list = list.filter(i =>
+    [i.name, i.sku, i.category].filter(Boolean).join(' ').toLowerCase().includes(q));
+  list.sort((a,b) => a.name.localeCompare(b.name));
+
+  const val = its.reduce((t,i) => t + i.stock*i.cost, 0);
+  const units = its.reduce((t,i) => t + Number(i.stock||0), 0);
+  $('#invSub').textContent = its.length
+    ? `${its.length} item${its.length===1?'':'s'} · ${qty(units)} in stock · ${money(val)} at cost`
+    : 'Nothing on the shelves yet';
+
+  fill($('#invList'), list.length
+    ? el('div',{class:'rows'}, ...list.map(itemRow))
+    : emptyState('box', q || UI.invFilter !== 'all' ? 'Nothing here' : 'No items yet',
+        q || UI.invFilter !== 'all' ? 'Try another word or filter.'
+          : 'Add what you sell, with what it costs you and what you charge.',
+        el('button',{class:'btn btn-accent', onclick:() => itemSheet(null)}, icon('plus'),'Add item')));
+}
+
+/* =====================================================================
+   Reports
+   ===================================================================== */
+function reportRows(){
+  const from = rangeStart(UI.repRange).getTime();
+  const ss = sales().filter(s => new Date(s.sold_at).getTime() >= from);
+  const ls = ss.flatMap(s => linesOf(s.id).map(l => ({ ...l, sale:s })));
+  return { ss, ls };
+}
+function renderReports(){
+  $$('#repRange .pill').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.range === UI.repRange)));
+  const { ss, ls } = reportRows();
+  const rev = ss.reduce((t,s) => t + (Number(s.total)||0), 0);
+  const prof = ss.reduce((t,s) => t + (Number(s.profit)||0), 0);
+  const units = ls.reduce((t,l) => t + (Number(l.qty)||0), 0);
+  const label = { today:'today', week:'this week', month:'this month', year:'this year', all:'all time' }[UI.repRange];
+
+  $('#repSub').textContent = `${shop()?.name || ''} · ${label}`;
+  $('#rRev').textContent = money(rev);
+  $('#rRevFoot').textContent = ss.length ? `avg ${money(rev/ss.length)} a sale` : 'No sales in this period';
+  $('#rProf').textContent = money(prof);
+  $('#rProfFoot').textContent = rev > 0 ? `${Math.round(prof/rev*100)}% margin` : 'After cost of goods';
+  $('#rCount').textContent = String(ss.length);
+  $('#rCountFoot').textContent = label;
+  $('#rUnits').textContent = qty(units);
+  $('#rUnitsFoot').textContent = `${new Set(ls.map(l => l.name)).size} different items`;
+
+  // best sellers
+  const by = new Map();
+  for (const l of ls){
+    const k = l.name;
+    const r = by.get(k) || { name:k, units:0, rev:0, prof:0 };
+    r.units += Number(l.qty)||0;
+    r.rev  += (Number(l.qty)||0) * (Number(l.price)||0);
+    r.prof += (Number(l.qty)||0) * ((Number(l.price)||0) - (Number(l.cost)||0));
+    by.set(k, r);
+  }
+  const top = Array.from(by.values()).sort((a,b) => b.rev - a.rev).slice(0,8);
+  const max = Math.max(1, ...top.map(t => t.rev));
+  fill($('#rTop'), top.length
+    ? el('div',{class:'rows'}, ...top.map(t =>
+        el('div',{class:'row', style:'padding-left:2px;padding-right:2px'},
+          el('div',{class:'row-main'},
+            el('div',{class:'row-title'}, el('span',{class:'name', text:t.name})),
+            el('div',{class:'row-sub', text:`${qty(t.units)} sold · ${money(t.prof)} profit`}),
+            el('div',{class:'bar'}, el('i',{style:`width:${Math.max(2, t.rev/max*100)}%`}))),
+          el('div',{class:'row-end'}, el('div',{class:'row-val', text:money(t.rev)})))))
+    : emptyState('chart','Nothing to report','No sales fell in this period.'));
+
+  // payment split
+  const pays = new Map();
+  for (const s of ss){
+    const k = s.payment || 'Unspecified';
+    pays.set(k, (pays.get(k)||0) + (Number(s.total)||0));
+  }
+  const pv = Array.from(pays.entries()).sort((a,b) => b[1]-a[1]);
+  fill($('#rPay'), pv.length
+    ? el('div',{class:'rows'}, ...pv.map(([k,v]) =>
+        el('div',{class:'row', style:'padding-left:2px;padding-right:2px'},
+          el('div',{class:'row-main'},
+            el('div',{class:'row-title'}, el('span',{class:'name', text:k})),
+            el('div',{class:'bar'}, el('i',{style:`width:${Math.max(2, v/rev*100)}%`}))),
+          el('div',{class:'row-end'},
+            el('div',{class:'row-val', text:money(v)}),
+            el('div',{class:'row-note', text:`${Math.round(v/rev*100)}%`})))))
+    : el('p',{style:'margin:0;font-size:13px;color:var(--muted)', text:'No sales in this period.'}));
+}
+
+function exportCsv(){
+  const { ls } = reportRows();
+  if (!ls.length) return toast('Nothing to export in this period', 'bad');
+  const esc = v => { const s = String(v ?? ''); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+  const head = ['Date','Time','Shop','Item','Qty','Unit price','Unit cost','Line total','Line profit','Payment','Sale total','Note'];
+  const rows = ls.map(l => [
+    dayKey(l.sale.sold_at), fmtTime(l.sale.sold_at), shop()?.name || '', l.name,
+    n2(l.qty), n2(l.price), n2(l.cost), n2(l.qty*l.price), n2(l.qty*(l.price-l.cost)),
+    l.sale.payment || '', n2(l.sale.total), l.sale.note || '',
+  ]);
+  const csv = [head, ...rows].map(r => r.map(esc).join(',')).join('\r\n');
+  download(new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'}),
+    `${(shop()?.name||'shop').toLowerCase().replace(/\W+/g,'-')}-sales-${UI.repRange}-${dayKey(new Date())}.csv`);
+  toast('CSV downloaded');
+}
+function download(blob, name){
+  const a = el('a',{href:URL.createObjectURL(blob), download:name});
+  document.body.append(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+
+/* =====================================================================
+   Settings
+   ===================================================================== */
+function renderSettings(){
+  fill($('#shopList'), el('div',{class:'rows'}, ...S.shops.map(s => {
+    const its = S.items.filter(i => i.shop_id === s.id && !i.archived).length;
+    const sl  = S.sales.filter(x => x.shop_id === s.id).length;
+    return el('div',{class:'row'},
+      el('div',{class:'thumb'}, icon('store')),
+      el('div',{class:'row-main'},
+        el('div',{class:'row-title'},
+          el('span',{class:'name', text:s.name}),
+          s.id === UI.shop ? el('span',{class:'tag violet', text:'Open'}) : null),
+        el('div',{class:'row-sub', text:`${its} item${its===1?'':'s'} · ${sl} sale${sl===1?'':'s'}`})),
+      el('div',{style:'display:flex;gap:6px;flex:none'},
+        el('button',{class:'iconbtn','aria-label':'Rename '+s.name, onclick:() => shopSheet(s)}, icon('edit')),
+        S.shops.length > 1
+          ? el('button',{class:'iconbtn','aria-label':'Delete '+s.name, onclick:() => removeShop(s)}, icon('trash'))
+          : null));
+  })));
+
+  const sh = shop();
+  $('#setShopName').textContent = sh?.name || '';
+  $('#setCurrency').value = sh?.currency || '₱';
+  $('#setReorder').value  = sh?.low_stock_at ?? 5;
+  $('#setPayments').value = (sh?.payment_methods || []).join(', ');
+
+  const theme = localStorage.getItem(LS.theme) || 'auto';
+  $$('#themeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.theme === theme)));
+
+  const remote = db?.mode === 'remote';
+  $('#verLine').textContent = remote
+    ? `Signed in as ${session?.user?.email || 'a user'} · syncing with Supabase`
+    : 'On-device mode · nothing leaves this browser';
+  $('#impJson').hidden = remote;
+  $('#wipe').textContent = '';
+  $('#wipe').append(icon('trash'), document.createTextNode(remote ? 'Sign out' : 'Erase everything'));
+  $('#wipe').className = 'btn ' + (remote ? 'btn-ghost' : 'btn-danger');
+}
+
+/* =====================================================================
+   Sheets — a sale
+   ===================================================================== */
+function saleSheet(){
+  if (!items().length){
+    return void openSheet({ title:'No items yet',
+      body: emptyState('box','Add something to sell first',
+        'A sale is built from your inventory, so the stock comes off by itself.',
+        el('button',{class:'btn btn-accent', onclick:() => { sheets[sheets.length-1].close(); itemSheet(null); }},
+          icon('plus'),'Add item')) });
+  }
+  const cart = [];
+  const cartBox = el('div',{});
+  const listBox = el('div',{});
+  const search = input({ type:'search', placeholder:'Search your items', autocomplete:'off' });
+  const discount = input({ type:'number', inputmode:'decimal', min:'0', step:'0.01', placeholder:'0.00' });
+  const note = input({ placeholder:'Optional — customer, table, anything' });
+  const pay = selectOf(payments(), payments()[0]);
+  const meta = el('div',{},
+    field('Payment', pay),
+    el('div',{class:'two'}, field('Discount', discount), field('Note', note)));
+  meta.hidden = true;
+  discount.addEventListener('input', renderCart);
+
+  const saveBtn = el('button',{class:'btn btn-accent', disabled:true, onclick:save}, 'Save sale');
+  const h = openSheet({
+    title:'New sale', sub:shop()?.name,
+    body:[ cartBox, meta,
+      el('div',{style:'margin:14px 0 8px 2px;font-size:12px;color:var(--muted)', text:'Tap to add'}),
+      el('label',{class:'searchwrap', style:'display:block;margin-bottom:10px'}, icon('search'), search),
+      listBox ],
+    foot:[ el('button',{class:'btn btn-ghost', onclick:() => h.close()}, 'Cancel'), saveBtn ],
+  });
+  search.addEventListener('input', renderList);
+
+  function add(it){
+    const line = cart.find(l => l.item_id === it.id);
+    const have = n2(it.stock);
+    const inCart = line ? line.qty : 0;
+    if (inCart + 1 > have) return toast(`Only ${qty(have)} of ${it.name} left`, 'bad');
+    if (line) line.qty = n2(line.qty + 1);
+    else cart.push({ item_id:it.id, name:it.name, qty:1, price:n2(it.price), cost:n2(it.cost) });
+    renderCart(); renderList();
+  }
+  function bump(line, d){
+    const it = itemById(line.item_id);
+    const next = n2(line.qty + d);
+    if (next <= 0){ cart.splice(cart.indexOf(line), 1); }
+    else if (it && next > n2(it.stock)) return toast(`Only ${qty(it.stock)} of ${it.name} left`, 'bad');
+    else line.qty = next;
+    renderCart(); renderList();
+  }
+  function totals(){
+    const gross = cart.reduce((t,l) => t + l.qty*l.price, 0);
+    const cost  = cart.reduce((t,l) => t + l.qty*l.cost, 0);
+    const disc  = Math.min(n2(discount.value) || 0, gross);
+    return { gross, cost, disc, total:n2(gross - disc), profit:n2(gross - disc - cost) };
+  }
+  function renderCart(){
+    meta.hidden = !cart.length;
+    if (!cart.length){
+      fill(cartBox, el('div',{class:'empty', style:'padding:26px 10px'},
+        el('div',{class:'em-ic'}, icon('sales')),
+        el('h3',{text:'Empty'}),
+        el('p',{text:'Pick from the list below to start the sale.'})));
+      saveBtn.disabled = true; saveBtn.textContent = 'Save sale';
+      return;
+    }
+    const t = totals();
+    fill(cartBox,
+      ...cart.map(l => el('div',{class:'line'},
+        el('div',{class:'line-main'},
+          el('div',{class:'row-title'}, el('span',{class:'name', text:l.name})),
+          el('div',{class:'row-sub', text:`${money(l.price)} each · ${money(l.qty*l.price)}`})),
+        el('div',{class:'stepper'},
+          el('button',{'aria-label':'Less', onclick:() => bump(l,-1)}, icon('minus')),
+          el('span',{class:'q', text:qty(l.qty)}),
+          el('button',{'aria-label':'More', onclick:() => bump(l, 1)}, icon('plus'))))),
+      el('div',{style:'margin-top:10px'},
+        el('div',{class:'totrow'}, el('span',{class:'k', text:'Subtotal'}), el('span',{class:'v', text:money(t.gross)})),
+        t.disc ? el('div',{class:'totrow'}, el('span',{class:'k', text:'Discount'}),
+                   el('span',{class:'v', text:'−'+money(t.disc)})) : null,
+        el('div',{class:'totrow'}, el('span',{class:'k', text:'Profit'}), el('span',{class:'v', text:money(t.profit)})),
+        el('div',{class:'totrow grand'}, el('span',{text:'Total'}), el('span',{class:'v', text:money(t.total)}))));
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save · ' + money(t.total);
+  }
+  function renderList(){
+    const q = search.value.trim().toLowerCase();
+    const list = items()
+      .filter(i => !q || [i.name,i.sku,i.category].filter(Boolean).join(' ').toLowerCase().includes(q))
+      .sort((a,b) => a.name.localeCompare(b.name));
+    fill(listBox, list.length
+      ? el('div',{class:'rows'}, ...list.map(it => {
+          const inCart = cart.find(l => l.item_id === it.id)?.qty || 0;
+          const left = n2(it.stock - inCart);
+          const out = left <= 0;
+          return el('button',{class:'row', disabled:out || null,
+            style: out ? 'opacity:.45' : null, onclick:() => add(it)},
+            el('div',{class:'thumb', text:(it.name||'?').charAt(0).toUpperCase()}),
+            el('div',{class:'row-main'},
+              el('div',{class:'row-title'},
+                el('span',{class:'name', text:it.name}),
+                inCart ? el('span',{class:'tag violet', text:qty(inCart)+' in sale'}) : null),
+              el('div',{class:'row-sub', text: out ? 'None left' : `${qty(left)} available`})),
+            el('div',{class:'row-end'}, el('div',{class:'row-val', text:money(it.price)})));
+        }))
+      : el('p',{style:'padding:18px 4px;font-size:13px;color:var(--muted)', text:'No item matches that.'}));
+  }
+  async function save(){
+    if (!cart.length) return;
+    const t = totals();
+    saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+    const saleId = uid(), now = new Date().toISOString();
+    try{
+      await db.addSale(
+        { id:saleId, shop_id:UI.shop, sold_at:now, discount:t.disc,
+          payment:pay.value, note:note.value.trim() || null, total:t.total, profit:t.profit },
+        cart.map(l => ({ id:uid(), sale_id:saleId, item_id:l.item_id, name:l.name,
+                         qty:l.qty, price:l.price, cost:l.cost })),
+        cart.map(l => ({ id:uid(), item_id:l.item_id, sale_id:saleId,
+                         delta:-l.qty, reason:'sale', note:null, created_at:now })));
+      h.close();
+      await refresh();
+      toast('Sale saved · ' + money(t.total));
+    }catch(e){ fail(e); saveBtn.disabled = false; saveBtn.textContent = 'Save · ' + money(t.total); }
+  }
+  renderCart(); renderList();
+}
+
+function saleDetail(s){
+  const ls = linesOf(s.id);
+  const gross = ls.reduce((t,l) => t + l.qty*l.price, 0);
+  const h = openSheet({
+    title: money(s.total),
+    sub: `${fmtDay(s.sold_at)} at ${fmtTime(s.sold_at)}${s.payment ? ' · '+s.payment : ''}`,
+    body: [
+      el('div',{}, ...ls.map(l => el('div',{class:'line'},
+        el('div',{class:'line-main'},
+          el('div',{class:'row-title'}, el('span',{class:'name', text:l.name})),
+          el('div',{class:'row-sub', text:`${qty(l.qty)} × ${money(l.price)}`})),
+        el('div',{class:'row-val', text:money(l.qty*l.price)})))),
+      el('div',{style:'margin-top:10px'},
+        el('div',{class:'totrow'}, el('span',{class:'k', text:'Subtotal'}), el('span',{class:'v', text:money(gross)})),
+        Number(s.discount) ? el('div',{class:'totrow'}, el('span',{class:'k', text:'Discount'}),
+          el('span',{class:'v', text:'−'+money(s.discount)})) : null,
+        el('div',{class:'totrow'}, el('span',{class:'k', text:'Profit'}), el('span',{class:'v', text:money(s.profit)})),
+        el('div',{class:'totrow grand'}, el('span',{text:'Total'}), el('span',{class:'v', text:money(s.total)}))),
+      s.note ? el('p',{style:'margin:16px 2px 0;font-size:13px;color:var(--muted)', text:s.note}) : null,
+    ],
+    foot: [
+      el('button',{class:'btn btn-ghost', onclick:() => h.close()}, 'Close'),
+      el('button',{class:'btn btn-danger', onclick:async () => {
+        if (!await ask({ title:'Void this sale?',
+          text:'The sale is deleted and every item on it goes back onto the shelf. There is no undo.',
+          ok:'Void sale', danger:true })) return;
+        try{ await db.deleteSale(s.id); h.close(); await refresh(); toast('Sale voided, stock put back'); }
+        catch(e){ fail(e); }
+      }}, icon('undo'),'Void'),
+    ],
+  });
+}
+
+/* =====================================================================
+   Sheets — an item
+   ===================================================================== */
+function itemSheet(it){
+  const isNew = !it;
+  const name = input({ value:it?.name || '', placeholder:'What you sell' });
+  const sku  = input({ value:it?.sku || '', placeholder:'Optional' });
+  const cat  = input({ value:it?.category || '', placeholder:'Optional', list:'catlist' });
+  const cost = input({ type:'number', inputmode:'decimal', min:'0', step:'0.01', value:it?.cost ?? '', placeholder:'0.00' });
+  const price= input({ type:'number', inputmode:'decimal', min:'0', step:'0.01', value:it?.price ?? '', placeholder:'0.00' });
+  const open = input({ type:'number', inputmode:'decimal', min:'0', step:'1', value:'0' });
+  const re   = input({ type:'number', inputmode:'numeric', min:'0', step:'1',
+                       value:it?.reorder_at ?? '', placeholder:String(shop()?.low_stock_at ?? 5) });
+  const cats = Array.from(new Set(S.items.map(i => i.category).filter(Boolean)));
+  const save = el('button',{class:'btn btn-accent', onclick:commit}, isNew ? 'Add item' : 'Save');
+
+  const h = openSheet({
+    title: isNew ? 'New item' : it.name,
+    sub: isNew ? shop()?.name : `${qty(it.stock)} in stock · ${money(it.stock*it.cost)} at cost`,
+    body: [
+      field('Name', name),
+      el('div',{class:'two'}, field('Cost to you', cost), field('You charge', price)),
+      el('div',{class:'two'}, field('SKU', sku), field('Category', cat)),
+      el('datalist',{id:'catlist'}, ...cats.map(c => el('option',{value:c}))),
+      isNew ? field('Opening stock', open) : null,
+      field('Warn me at or below', re),
+      isNew ? null : el('div',{style:'display:flex;gap:9px;flex-wrap:wrap;margin-top:6px'},
+        el('button',{class:'btn btn-ink btn-sm', onclick:() => { h.close(); moveSheet(it,'restock'); }},
+          icon('plus'),'Restock'),
+        el('button',{class:'btn btn-ghost btn-sm', onclick:() => { h.close(); moveSheet(it,'count'); }},
+          icon('edit'),'Correct the count'),
+        el('button',{class:'btn btn-ghost btn-sm', style:'color:var(--bad);border-color:var(--bad)',
+          onclick:() => removeItem(it, h)}, icon('trash'),'Delete')),
+    ],
+    foot: [ el('button',{class:'btn btn-ghost', onclick:() => h.close()}, 'Cancel'), save ],
+  });
+  setTimeout(() => name.focus(), 120);
+
+  async function commit(){
+    const nm = name.value.trim();
+    if (!nm) return toast('Give it a name', 'bad');
+    const patch = {
+      name:nm, sku:sku.value.trim() || null, category:cat.value.trim() || null,
+      cost:n2(cost.value) || 0, price:n2(price.value) || 0,
+      reorder_at: re.value === '' ? null : Math.max(0, Math.round(Number(re.value))),
+    };
+    save.disabled = true; save.textContent = 'Saving…';
+    try{
+      if (isNew){
+        const id = uid(), now = new Date().toISOString();
+        await db.addItem({ id, shop_id:UI.shop, ...patch, archived:false, created_at:now, updated_at:now });
+        const start = n2(open.value) || 0;
+        if (start > 0){
+          // Stock is never set directly — it arrives as an opening movement, so
+          // the history explains every unit on the shelf.
+          const fresh = (await db.load()).items.find(i => i.shop_id === UI.shop && i.name === nm);
+          await db.addMovements([{ id:uid(), item_id:(fresh?.id || id), sale_id:null,
+            delta:start, reason:'opening', note:'Opening stock', created_at:now }]);
+        }
+      } else {
+        await db.updateItem(it.id, patch);
+      }
+      h.close(); await refresh();
+      toast(isNew ? 'Item added' : 'Saved');
+    }catch(e){ fail(e); save.disabled = false; save.textContent = isNew ? 'Add item' : 'Save'; }
+  }
+}
+
+function moveSheet(it, kind){
+  const restock = kind === 'restock';
+  const qtyIn = input({ type:'number', inputmode:'decimal', step:'1',
+                        value: restock ? '' : qty(it.stock), placeholder: restock ? '0' : '' });
+  const note  = input({ placeholder: restock ? 'Supplier, batch, anything' : 'Why the count changed' });
+  const save  = el('button',{class:'btn btn-accent', onclick:commit}, restock ? 'Add to stock' : 'Set count');
+  const h = openSheet({
+    title: restock ? 'Restock' : 'Correct the count',
+    sub: `${it.name} · ${qty(it.stock)} on the shelf now`,
+    body: [ field(restock ? 'How many came in' : 'What the shelf actually holds', qtyIn),
+            field('Note', note) ],
+    foot: [ el('button',{class:'btn btn-ghost', onclick:() => h.close()}, 'Cancel'), save ],
+  });
+  setTimeout(() => qtyIn.focus(), 120);
+
+  async function commit(){
+    const v = n2(qtyIn.value);
+    if (!Number.isFinite(v)) return toast('Enter a number', 'bad');
+    const delta = restock ? v : n2(v - it.stock);
+    if (!delta) { h.close(); return toast('Nothing changed'); }
+    save.disabled = true; save.textContent = 'Saving…';
+    try{
+      await db.addMovements([{ id:uid(), item_id:it.id, sale_id:null, delta,
+        reason: restock ? 'restock' : 'count', note:note.value.trim() || null,
+        created_at:new Date().toISOString() }]);
+      h.close(); await refresh();
+      toast(restock ? `+${qty(delta)} ${it.name}` : `${it.name} set to ${qty(v)}`);
+    }catch(e){ fail(e); save.disabled = false; save.textContent = restock ? 'Add to stock' : 'Set count'; }
+  }
+}
+
+async function removeItem(it, h){
+  const sold = S.lines.some(l => l.item_id === it.id);
+  if (!await ask({ title:`Delete ${it.name}?`,
+    text: sold ? 'It has been sold before. Past sales keep their own copy of the name and price, so your reports stay right — but the item and its stock history go.'
+               : 'The item and its stock history go. There is no undo.',
+    ok:'Delete', danger:true })) return;
+  try{ await db.deleteItem(it.id); h?.close(); await refresh(); toast('Item deleted'); }
+  catch(e){ fail(e); }
+}
+
+/* =====================================================================
+   Sheets — a shop
+   ===================================================================== */
+function shopSheet(s){
+  const isNew = !s;
+  const name = input({ value:s?.name || '', placeholder:'Shop name' });
+  const save = el('button',{class:'btn btn-accent', onclick:commit}, isNew ? 'Add shop' : 'Save');
+  const h = openSheet({
+    title: isNew ? 'New shop' : 'Rename shop',
+    sub: isNew ? 'It gets its own items, sales and reports.' : s.name,
+    body: field('Name', name),
+    foot: [ el('button',{class:'btn btn-ghost', onclick:() => h.close()}, 'Cancel'), save ],
+  });
+  setTimeout(() => { name.focus(); name.select(); }, 120);
+
+  async function commit(){
+    const nm = name.value.trim();
+    if (!nm) return toast('Give it a name', 'bad');
+    save.disabled = true; save.textContent = 'Saving…';
+    try{
+      if (isNew){
+        const id = uid();
+        await db.addShop({ id, name:nm, sort:S.shops.length, currency:shop()?.currency || '₱',
+          low_stock_at:5, payment_methods:payments(), archived:false,
+          created_at:new Date().toISOString() });
+        await refresh();
+        const made = S.shops.find(x => x.name === nm);
+        if (made){ UI.shop = made.id; saveUI(); renderTabs(); renderAll(); }
+        h.close(); toast(nm + ' added');
+      } else {
+        await db.updateShop(s.id, { name:nm });
+        h.close(); await refresh(); toast('Renamed');
+      }
+    }catch(e){ fail(e); save.disabled = false; save.textContent = isNew ? 'Add shop' : 'Save'; }
+  }
+}
+
+async function removeShop(s){
+  const its = S.items.filter(i => i.shop_id === s.id).length;
+  const sl  = S.sales.filter(x => x.shop_id === s.id).length;
+  if (!await ask({ title:`Delete ${s.name}?`,
+    text:`Its ${its} item${its===1?'':'s'} and ${sl} sale${sl===1?'':'s'} go with it. There is no undo.`,
+    ok:'Delete shop', danger:true })) return;
+  try{
+    await db.deleteShop(s.id);
+    if (UI.shop === s.id) UI.shop = null;
+    await refresh(); renderTabs();
+    toast(s.name + ' deleted');
+  }catch(e){ fail(e); }
+}
+
+/* =====================================================================
+   Backup
+   ===================================================================== */
+function exportJson(){
+  const payload = { app:'sales-inventory', version:1, exported_at:new Date().toISOString(),
+    source:db?.mode || 'local', ...S };
+  download(new Blob([JSON.stringify(payload,null,2)], {type:'application/json'}),
+    `sales-inventory-backup-${dayKey(new Date())}.json`);
+  toast('Backup downloaded');
+}
+async function importJson(file){
+  try{
+    const d = JSON.parse(await file.text());
+    if (!d || !Array.isArray(d.shops)) throw new Error('That is not a backup from this app.');
+    if (!await ask({ title:'Restore this backup?',
+      text:`It replaces everything on this device with ${d.shops.length} shop(s), ${d.items?.length||0} item(s) and ${d.sales?.length||0} sale(s).`,
+      ok:'Restore', danger:true })) return;
+    await localDb.replaceAll({ shops:d.shops||[], items:d.items||[], sales:d.sales||[],
+      lines:d.lines||[], movements:d.movements||[] });
+    UI.shop = null; await refresh(); renderTabs();
+    toast('Backup restored');
+  }catch(e){ fail(e); }
+}
+
+/* =====================================================================
+   Theme
+   ===================================================================== */
+function applyTheme(t){
+  if (t === 'auto') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem(LS.theme, t);
+}
+
+/* =====================================================================
+   Sign in. There is no sign-up on purpose — users are made by hand in the
+   Supabase dashboard, under Authentication → Users.
+   ===================================================================== */
+function signInScreen(problem){
+  const email = input({ type:'email', placeholder:'you@example.com', autocomplete:'username' });
+  const pass  = input({ type:'password', placeholder:'Password', autocomplete:'current-password' });
+  const msg   = el('p',{ style:'margin:2px 2px 10px;font-size:13px;color:var(--bad);min-height:18px',
+                         text:problem || '' });
+  const go    = el('button',{class:'btn btn-accent btn-block', onclick:submit}, 'Sign in');
+  const scrim = el('div',{class:'scrim', style:'align-items:center;padding:20px'});
+  const card  = el('div',{class:'sheet', style:'border-radius:var(--r-card);max-width:420px;padding:26px 24px calc(env(safe-area-inset-bottom) + 24px)'},
+    el('div',{style:'display:flex;align-items:center;gap:11px;margin-bottom:18px'},
+      el('span',{class:'brand-mark'}, icon('store')),
+      el('div',{}, el('h2',{style:'font-size:21px', text:'Sales & Inventory'}),
+        el('div',{class:'sub', style:'font-size:12px;color:var(--muted);margin-top:2px',
+                  text:'Project Drex · Mixel'}))),
+    field('Email', email), field('Password', pass), msg, go,
+    el('button',{class:'btn btn-ghost btn-block', style:'margin-top:10px', onclick:async () => {
+      scrim.remove(); document.body.style.overflow=''; await startLocal();
+      toast('Working on this device only');
+    }}, 'Use this device only'));
+  scrim.append(card);
+  $('#sheetHost').append(scrim);
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => email.focus(), 150);
+  pass.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+
+  async function submit(){
+    msg.textContent = '';
+    if (!email.value.trim() || !pass.value) { msg.textContent = 'Both fields, please.'; return; }
+    go.disabled = true; go.textContent = 'Signing in…';
+    const { data, error } = await sb.auth.signInWithPassword(
+      { email:email.value.trim(), password:pass.value });
+    if (error){
+      msg.textContent = error.message || 'That did not work.';
+      go.disabled = false; go.textContent = 'Sign in';
+      return;
+    }
+    session = data.session;
+    try{
+      await startRemote();            // only dismiss once the data is really there
+    }catch(err){
+      msg.textContent = err.message;
+      go.disabled = false; go.textContent = 'Sign in';
+      return;
+    }
+    localStorage.setItem(LS.mode, 'remote');
+    scrim.remove(); document.body.style.overflow = '';
+    toast('Signed in');
+  }
+}
+
+/* =====================================================================
+   Wiring, rendering, boot
+   ===================================================================== */
+function fail(e){
+  console.error(e);
+  const m = e?.message || String(e);
+  toast(/permission|policy|denied/i.test(m) ? 'The database refused that — check you are signed in.' : m, 'bad');
+}
+
+function updateFab(){
+  const fab = $('#fab');
+  fab.replaceChildren();
+  if (UI.view === 'overview' || UI.view === 'sales'){
+    fab.hidden = false; fab.append(icon('plus'), document.createTextNode('New sale'));
+    fab.onclick = () => saleSheet();
+  } else if (UI.view === 'inventory'){
+    fab.hidden = false; fab.append(icon('plus'), document.createTextNode('Add item'));
+    fab.onclick = () => itemSheet(null);
+  } else {
+    fab.hidden = true; fab.onclick = null;
+  }
+}
+
+function go(view){
+  UI.view = view; saveUI();
+  window.scrollTo({ top:0, behavior:'instant' in window ? 'instant' : 'auto' });
+  renderAll();
+}
+
+function renderAll(){
+  $$('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + UI.view));
+  $$('[data-go]').forEach(b => {
+    if (b.dataset.go === UI.view) b.setAttribute('aria-current','page');
+    else b.removeAttribute('aria-current');
+  });
+  if (UI.view === 'overview')       renderOverview();
+  else if (UI.view === 'sales')     renderSales();
+  else if (UI.view === 'inventory') renderInventory();
+  else if (UI.view === 'reports')   renderReports();
+  else if (UI.view === 'settings')  renderSettings();
+  updateFab();
+}
+
+async function refresh(){
+  const d = await db.load();
+  S = { shops:d.shops || [], items:d.items || [], sales:d.sales || [],
+        lines:d.lines || [], movements:d.movements || [] };
+  S.shops.sort((a,b) => (a.sort ?? 0) - (b.sort ?? 0) || a.name.localeCompare(b.name));
+  if (!S.shops.some(s => s.id === UI.shop)) UI.shop = S.shops[0]?.id || null;
+  saveUI();
+  renderTabs(); renderAll();
+}
+
+function wire(){
+  $$('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+  $('#addShop').addEventListener('click', () => shopSheet(null));
+  $('#addShop2').addEventListener('click', () => shopSheet(null));
+
+  $('#salesSearch').addEventListener('input', e => { UI.salesQuery = e.target.value; renderSales(); });
+  $('#invSearch').addEventListener('input', e => { UI.invQuery = e.target.value; renderInventory(); });
+  $$('#salesRange .pill').forEach(b => b.addEventListener('click', () => {
+    UI.salesRange = b.dataset.range; saveUI(); renderSales(); }));
+  $$('#repRange .pill').forEach(b => b.addEventListener('click', () => {
+    UI.repRange = b.dataset.range; saveUI(); renderReports(); }));
+  $('#repCsv').addEventListener('click', exportCsv);
+  $('#repPrint').addEventListener('click', () => window.print());
+
+  const saveShopField = async (patch) => {
+    if (!shop()) return;
+    try{ await db.updateShop(shop().id, patch); await refresh(); }catch(e){ fail(e); }
+  };
+  $('#setCurrency').addEventListener('change', e =>
+    saveShopField({ currency: e.target.value.trim() || '₱' }));
+  $('#setReorder').addEventListener('change', e =>
+    saveShopField({ low_stock_at: Math.max(0, Math.round(Number(e.target.value) || 0)) }));
+  $('#setPayments').addEventListener('change', e => {
+    const list = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+    saveShopField({ payment_methods: list.length ? list : ['Cash'] });
+  });
+
+  $$('#themeSeg button').forEach(b => b.addEventListener('click', () => {
+    applyTheme(b.dataset.theme); renderSettings(); }));
+
+  $('#expJson').addEventListener('click', exportJson);
+  $('#impJson').addEventListener('click', () => $('#impFile').click());
+  $('#impFile').addEventListener('change', e => {
+    const f = e.target.files?.[0]; e.target.value = '';
+    if (f) importJson(f);
+  });
+
+  $('#wipe').addEventListener('click', async () => {
+    if (db?.mode === 'remote'){
+      if (!await ask({ title:'Sign out?', text:'The shop data stays in Supabase. You will need your password to get back in.', ok:'Sign out' })) return;
+      await sb.auth.signOut();
+      localStorage.removeItem(LS.mode);
+      location.reload();
+      return;
+    }
+    if (!await ask({ title:'Erase everything?',
+      text:'Every shop, item and sale in this browser goes. Download a backup first if you are not sure. There is no undo.',
+      ok:'Erase it all', danger:true })) return;
+    localStorage.removeItem(LS.data);
+    UI.shop = null; saveUI();
+    await refresh();
+    toast('Erased');
+  });
+
+  const tb = $('#topbar');
+  const onScroll = () => tb.classList.toggle('stuck', window.scrollY > 4);
+  window.addEventListener('scroll', onScroll, { passive:true }); onScroll();
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && db?.mode === 'remote') refresh().catch(() => {});
+  });
+}
+
+let rtTimer = null;
+function subscribeRealtime(){
+  try{
+    sb.channel('salesinv-' + Math.random().toString(36).slice(2))
+      .on('postgres_changes', { event:'*', schema:'public' }, p => {
+        if (String(p.table || '').startsWith(CFG.tablePrefix || 'salesinv_')){
+          clearTimeout(rtTimer);
+          rtTimer = setTimeout(() => refresh().catch(() => {}), 600);
+        }
+      })
+      .subscribe();
+  }catch(e){ console.warn('Realtime unavailable, falling back to refresh on focus.', e); }
+}
+
+async function startRemote(){
+  db = remoteDb(sb);
+  try{
+    await refresh();
+  }catch(e){
+    console.error(e);
+    db = null;
+    const m = e?.message || '';
+    throw new Error(/schema cache|does not exist|relation/i.test(m)
+      ? 'Signed in, but this Supabase project has no salesinv_ tables yet. Run supabase/schema.sql in the SQL editor, then try again.'
+      : (m || 'Signed in, but the shops would not load.'));
+  }
+  subscribeRealtime();
+}
+async function startLocal(){
+  db = localDb;
+  localStorage.setItem(LS.mode, 'local');
+  await refresh();
+}
+
+async function boot(){
+  applyTheme(localStorage.getItem(LS.theme) || 'auto');
+  wire();
+  if (localStorage.getItem(LS.mode) === 'local' || !CFG.supabaseUrl || !CFG.supabaseKey){
+    return startLocal();
+  }
+  try{
+    const mod = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+    sb = mod.createClient(CFG.supabaseUrl, CFG.supabaseKey,
+      { auth:{ persistSession:true, autoRefreshToken:true } });
+    const { data, error } = await sb.auth.getSession();
+    if (error) throw error;
+    session = data.session;
+    if (!session) return signInScreen();
+    await startRemote();
+  }catch(e){
+    console.error(e);
+    if (sb) signInScreen('Could not reach Supabase. Sign in again, or work on this device.');
+    else {
+      await startLocal();
+      toast('Offline — working on this device', 'bad');
+    }
+  }
+}
+
+boot();
+</script>
+</body>
+</html>
