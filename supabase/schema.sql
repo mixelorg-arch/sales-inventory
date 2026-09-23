@@ -10,7 +10,7 @@
 --
 --  Security model (the same one the photobooth app uses):
 --    * RLS on every table, one policy, "to authenticated".
---    * anon is revoked from everything, so the publishable key in config.js
+--    * anon is revoked from everything, so the publishable key in config.jsx
 --      can sit in a public repo and still return nothing to a stranger.
 --    * there is no sign-up screen on purpose — create users by hand in
 --      Authentication → Users.

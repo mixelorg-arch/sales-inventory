@@ -490,6 +490,85 @@ button.row:active{background:var(--surface-sunk)}
 .bar{height:6px;border-radius:var(--r-pill);background:var(--surface-sunk);overflow:hidden;margin-top:7px}
 .bar i{display:block;height:100%;border-radius:var(--r-pill);background:var(--accent)}
 
+/* ============================ photo scan ============================ */
+.drop{
+  border:1px dashed var(--border-2);border-radius:var(--r-inner);
+  padding:26px 18px;text-align:center;color:var(--muted);
+  background:var(--surface-2);transition:border-color .16s,background .16s;
+}
+.drop.hot{border-color:var(--accent);background:var(--accent-wash)}
+.drop .ic{
+  width:50px;height:50px;border-radius:var(--r-tile);margin:0 auto 11px;
+  background:var(--surface);display:grid;place-items:center;color:var(--accent);
+  box-shadow:var(--shadow-soft);
+}
+.drop .ic svg{width:22px;height:22px}
+.drop h3{font-size:16px;color:var(--ink);margin-bottom:5px}
+.drop p{margin:0 auto;font-size:12.5px;max-width:32ch;line-height:1.45;letter-spacing:-.017em}
+
+.shot{
+  position:relative;border-radius:var(--r-inner);overflow:hidden;
+  background:var(--surface-sunk);margin-bottom:14px;
+}
+.shot img{display:block;width:100%;max-height:190px;object-fit:cover}
+.shot .redo{
+  position:absolute;right:10px;bottom:10px;
+  background:var(--overlay);color:#fff;border:0;
+  height:32px;padding:0 13px;border-radius:var(--r-pill);
+  font-size:12.5px;letter-spacing:-.017em;display:inline-flex;align-items:center;gap:6px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.shot .redo svg{width:13px;height:13px}
+
+.prog{height:5px;border-radius:var(--r-pill);background:var(--surface-sunk);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent);border-radius:var(--r-pill);
+  transition:width .25s ease-out}
+.prog-lab{font-size:12.5px;color:var(--muted);letter-spacing:-.017em;margin:9px 2px 0}
+
+/* one parsed line, editable in place */
+.pl{
+  display:grid;grid-template-columns:28px 52px minmax(0,1fr) 84px;
+  gap:7px;align-items:center;padding:9px 0;
+}
+.pl + .pl{box-shadow:inset 0 1px 0 var(--border)}
+.pl.off{opacity:.4}
+.pl-tick{
+  width:22px;height:22px;border-radius:7px;flex:none;
+  border:1.5px solid var(--border-2);background:var(--surface);
+  display:grid;place-items:center;color:transparent;transition:all .14s;
+}
+.pl-tick[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.pl-tick svg{width:13px;height:13px}
+.pl input{
+  width:100%;height:38px;padding:0 10px;font-size:14px;letter-spacing:-.017em;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:11px;
+  transition:border-color .15s,background .15s;min-width:0;
+}
+.pl input:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.pl input.num{text-align:right;font-variant-numeric:tabular-nums}
+.pl-name{min-width:0}
+.pl-hint{
+  grid-column:3 / -1;margin-top:-2px;
+  font-size:11px;letter-spacing:-.017em;color:var(--muted);
+  display:flex;align-items:center;gap:5px;flex-wrap:wrap;
+}
+.pl-hint .tag{height:19px;font-size:10.5px;padding:0 8px}
+
+.scan-note{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:12px 14px;border-radius:var(--r-tile);margin-bottom:14px;
+  font-size:12.5px;line-height:1.45;letter-spacing:-.017em;
+}
+.scan-note svg{width:15px;height:15px;flex:none;margin-top:1px}
+.scan-note.warn{background:var(--warn-wash);color:var(--warn)}
+.scan-note.bad{background:var(--bad-wash);color:var(--bad)}
+.scan-note.ok{background:var(--accent-wash);color:var(--accent)}
+
+@media (max-width:380px){
+  .pl{grid-template-columns:24px 46px minmax(0,1fr) 74px;gap:5px}
+  .pl input{padding:0 7px;font-size:13px}
+}
+
 /* ============================ responsive ============================ */
 /* iPhone 16 Pro is 402pt wide, 16 Pro Max is 440pt — both land here. */
 @media (max-width:460px){
@@ -579,6 +658,8 @@ button.row:active{background:var(--surface-sunk)}
 <symbol id="i-peso" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20V4h5.5a4.2 4.2 0 0 1 0 8.4H7"/><path d="M5 8.5h11M5 12h11"/></symbol>
 <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></symbol>
 <symbol id="i-more" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></symbol>
+<symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5a2 2 0 0 1 2-2h2.2l1.2-2h7.2l1.2 2H19a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.6"/></symbol>
+<symbol id="i-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5V6a2 2 0 0 1 2-2h2.5"/><path d="M20 8.5V6a2 2 0 0 0-2-2h-2.5"/><path d="M4 15.5V18a2 2 0 0 0 2 2h2.5"/><path d="M20 15.5V18a2 2 0 0 1-2 2h-2.5"/><path d="M3.5 12h17"/></symbol>
 <symbol id="i-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h11a5 5 0 0 1 0 10h-4"/><path d="m8 5-4 4 4 4"/></symbol>
 </svg>
 
@@ -667,6 +748,7 @@ button.row:active{background:var(--surface-sunk)}
     <section class="view" id="v-sales">
       <div class="view-head">
         <div><h1>Sales</h1><p id="salesSub"></p></div>
+        <button class="btn btn-ghost btn-sm" id="salesScan"><svg><use href="#i-camera"/></svg>Scan</button>
       </div>
       <div style="display:flex;gap:9px;margin-bottom:12px">
         <label class="searchwrap"><svg><use href="#i-search"/></svg>
@@ -686,6 +768,7 @@ button.row:active{background:var(--surface-sunk)}
     <section class="view" id="v-inventory">
       <div class="view-head">
         <div><h1>Inventory</h1><p id="invSub"></p></div>
+        <button class="btn btn-ghost btn-sm" id="invScan"><svg><use href="#i-camera"/></svg>Scan</button>
       </div>
       <div style="display:flex;gap:9px;margin-bottom:12px">
         <label class="searchwrap"><svg><use href="#i-search"/></svg>
@@ -956,7 +1039,7 @@ const localDb = {
     this._write(d);
   },
 
-  async addItem(it){ const d = this._read(); d.items.push({ ...it, stock:0 }); this._write(d); },
+  async addItem(it){ const d = this._read(); d.items.push({ ...it, stock:0 }); this._write(d); return it.id; },
   async updateItem(id, patch){ const d = this._read();
     const i = d.items.find(x => x.id === id);
     if (i){ const { stock, ...safe } = patch; Object.assign(i, safe, { updated_at:new Date().toISOString() }); }
@@ -1025,7 +1108,8 @@ function remoteDb(client){
       const r = await client.from(T('shops')).delete().eq('id', id); if (r.error) throw r.error; },
 
     async addItem(it){ const { stock, ...rest } = it;   // stock belongs to the trigger
-      const r = await client.from(T('items')).insert(rest); if (r.error) throw r.error; },
+      const r = await client.from(T('items')).insert(rest).select('id').single();
+      if (r.error) throw r.error; return r.data.id; },
     async updateItem(id, patch){ const { stock, ...safe } = patch;
       const r = await client.from(T('items')).update(safe).eq('id', id); if (r.error) throw r.error; },
     async deleteItem(id){
@@ -1318,7 +1402,9 @@ function renderInventory(){
     : emptyState('box', q || UI.invFilter !== 'all' ? 'Nothing here' : 'No items yet',
         q || UI.invFilter !== 'all' ? 'Try another word or filter.'
           : 'Add what you sell, with what it costs you and what you charge.',
-        el('button',{class:'btn btn-accent', onclick:() => itemSheet(null)}, icon('plus'),'Add item')));
+        el('div',{style:'display:flex;gap:9px;justify-content:center;flex-wrap:wrap'},
+          el('button',{class:'btn btn-accent', onclick:() => itemSheet(null)}, icon('plus'),'Add item'),
+          el('button',{class:'btn btn-ghost', onclick:() => scanSheet('items')}, icon('camera'),'From a photo'))));
 }
 
 /* =====================================================================
@@ -1664,13 +1750,13 @@ function itemSheet(it){
     try{
       if (isNew){
         const id = uid(), now = new Date().toISOString();
-        await db.addItem({ id, shop_id:UI.shop, ...patch, archived:false, created_at:now, updated_at:now });
+        const newId = await db.addItem(
+          { id, shop_id:UI.shop, ...patch, archived:false, created_at:now, updated_at:now });
         const start = n2(open.value) || 0;
         if (start > 0){
           // Stock is never set directly — it arrives as an opening movement, so
           // the history explains every unit on the shelf.
-          const fresh = (await db.load()).items.find(i => i.shop_id === UI.shop && i.name === nm);
-          await db.addMovements([{ id:uid(), item_id:(fresh?.id || id), sale_id:null,
+          await db.addMovements([{ id:uid(), item_id:newId || id, sale_id:null,
             delta:start, reason:'opening', note:'Opening stock', created_at:now }]);
         }
       } else {
@@ -1772,6 +1858,554 @@ async function removeShop(s){
     await refresh(); renderTabs();
     toast(s.name + ' deleted');
   }catch(e){ fail(e); }
+}
+
+/* =====================================================================
+   Reading a photo — the text reader
+
+   Tesseract runs in a web worker in this browser. Nothing is uploaded, it
+   costs nothing, and once the language data is cached it works offline.
+   It is only fetched the first time you scan, so it never slows the app
+   down for anyone who does not use it.
+   ===================================================================== */
+const TESS = {
+  js    : 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/7.0.0/tesseract.min.js',
+  worker: 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/7.0.0/worker.min.js',
+  core  : 'https://cdn.jsdelivr.net/npm/tesseract.js-core@7.0.0',
+  lang  : 'https://tessdata.projectnaptha.com/4.0.0',
+};
+let ocrWorker = null, ocrProgress = null;
+
+function loadScript(src){
+  return new Promise((ok, no) => {
+    const t = el('script',{ src });
+    t.onload = ok;
+    t.onerror = () => no(new Error('Could not download the text reader. Check your connection and try again.'));
+    document.head.append(t);
+  });
+}
+async function ocrReady(onStatus){
+  if (ocrWorker) return ocrWorker;
+  if (!window.Tesseract){ onStatus?.('Fetching the text reader…'); await loadScript(TESS.js); }
+  onStatus?.('Starting the text reader…');
+  ocrWorker = await window.Tesseract.createWorker('eng', 1, {
+    workerPath:TESS.worker, corePath:TESS.core, langPath:TESS.lang,
+    logger: m => { if (ocrProgress) ocrProgress(m); },
+  });
+  await ocrWorker.setParameters({
+    preserve_interword_spaces:'1',   // keeps the columns apart
+    tessedit_pageseg_mode:'6',       // one uniform block of text
+  });
+  return ocrWorker;
+}
+
+function fileToImage(file){
+  return new Promise((ok, no) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload  = () => { ok(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); no(new Error('That file is not an image this browser can open.')); };
+    img.src = url;
+  });
+}
+
+/* Downscale and desaturate, and deliberately nothing more.
+
+   Measured on a simulated phone photo of a receipt (rotation, uneven shadow,
+   noise): grayscale alone read it at 100%, a Bradley adaptive threshold at
+   69.6% and a global Otsu threshold at 97.4%. Tesseract binarises internally
+   and is better at it than anything we can do first — thresholding here only
+   eats thin strokes. On a genuinely blurred, faded photo nothing helped
+   (best 28.8%), which is why low confidence asks for a new photo instead. */
+function prepPhoto(img, maxDim = 1800){
+  const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.max(1, Math.round(img.naturalWidth * scale));
+  const h = Math.max(1, Math.round(img.naturalHeight * scale));
+  const c = el('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d', { willReadFrequently:true });
+  x.drawImage(img, 0, 0, w, h);
+  const im = x.getImageData(0, 0, w, h), a = im.data;
+  for (let i = 0; i < a.length; i += 4){
+    const g = 0.299*a[i] + 0.587*a[i+1] + 0.114*a[i+2];
+    a[i] = a[i+1] = a[i+2] = g;
+  }
+  x.putImageData(im, 0, 0);
+  return c;
+}
+
+async function readPhoto(canvas, onProgress, onStatus){
+  const w = await ocrReady(onStatus);
+  onStatus?.('Reading the photo…');
+  ocrProgress = m => { if (m.status === 'recognizing text') onProgress?.(m.progress || 0); };
+  try {
+    const { data } = await w.recognize(canvas);
+    return { text:data.text || '', confidence:Number(data.confidence) || 0 };
+  } finally { ocrProgress = null; }
+}
+
+/* =====================================================================
+   Turning read text into rows
+   ===================================================================== */
+
+/* Lines that are part of a receipt but never an item. */
+const SKIP_LINE = /^(sub\s?-?total|total|amount|balance|change|cash|gcash|card|paid|vat|tin\b|or\s?#|invoice|receipt|delivery|deliver|date|qty|item|description|particulars|unit|price|thank|customer|address|contact|tel|phone|page|signature|received|prepared|checked|approved)\b/i;
+
+/* A date reads exactly like an item line with a quantity and a price —
+   "Sept 23, 2026" came through as qty 23 at 2026 each. */
+const DATE_LINE = /^(mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun|jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?,?\s*\d/i;
+const DATE_NUM  = /\d{1,2}\s*[\/.-]\s*\d{1,2}\s*[\/.-]\s*\d{2,4}/;
+
+/* Titles sit in the middle of their line as often as at the start —
+   "MIXEL PRICE LIST 2026" came through as an item costing 2026. */
+const HEADING = /(price\s*list|pricelist|menu|official\s+receipt|delivery\s+receipt|sales\s+invoice|statement\s+of\s+account|purchase\s+order|inventory\s+list|stock\s+list)/i;
+
+function numTokens(line){
+  const out = [], re = /(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2})?/g;
+  let m;
+  while ((m = re.exec(line))){
+    const at = m.index, end = at + m[0].length;
+    const before = at > 0 ? line[at-1] : ' ';
+    const after  = end < line.length ? line[end] : ' ';
+    out.push({
+      raw:m[0], at, end,
+      val:Number(m[0].replace(/,/g,'')),
+      // Has decimals or thousands separators, so it reads as money.
+      money:/\.\d{1,2}$/.test(m[0]) || /,\d{3}/.test(m[0]),
+      // Free-standing, i.e. not glued to letters or digits. This is what keeps
+      // "4x4", "CP1500" and "KP-108IN" inside the item name where they belong
+      // instead of being mistaken for a quantity or a price.
+      free: !/[A-Za-z0-9]/.test(before) && !/[A-Za-z0-9]/.test(after),
+    });
+  }
+  return out;
+}
+
+function parseLine(raw){
+  let line = raw.replace(/[|_*·•]+/g, ' ').replace(/\s+/g, ' ').trim();
+  // A peso sign typed as a bare P glues itself to the figure — "P50.00" — and
+  // a glued number is deliberately ignored below, so the price vanished.
+  // Only a standalone P/PHP sitting straight before digits is touched, which
+  // leaves "CP1500" and "Paper" alone.
+  line = line.replace(/(^|\s)(?:php|p)\s*(?=\d)/gi, '$1');
+  if (line.length < 3) return null;
+  // One letter is enough: "2 4R 70" is a real line, 4R being a print size.
+  if (!/[A-Za-z]/.test(line)) return null;
+  if (SKIP_LINE.test(line) || DATE_LINE.test(line) || DATE_NUM.test(line)) return null;
+  if (HEADING.test(line)) return null;
+  // A lone year in a line shouted in capitals is a heading, not a price.
+  // Lower case anywhere means it reads as a product, so "Tarpaulin 2000" stays.
+  if (!/[a-z]/.test(line)){
+    const only = line.match(/\d+(?:[.,]\d+)*/g) || [];
+    if (only.length === 1 && /^(19|20)\d{2}$/.test(only[0])) return null;
+  }
+
+  let qty = null;
+  const cut = [];                       // spans to remove from the name
+
+  // "3x Guest Book" / "3 x Guest Book" — the lookahead for a letter is what
+  // stops "4x4 Photo Paper" being read as a quantity of four.
+  let m = line.match(/(^|\s)(\d{1,4})\s*[x×]\s+(?=[A-Za-z])/);
+  if (m){ qty = Number(m[2]); cut.push([m.index + m[1].length, m.index + m[0].length]); }
+  if (qty === null){                    // "Guest Book x3"
+    m = line.match(/\s[x×]\s*(\d{1,4})\s*$/);
+    if (m){ qty = Number(m[1]); cut.push([m.index, m.index + m[0].length]); }
+  }
+
+  const all = numTokens(line).filter(t => t.free
+    && !cut.some(([a,b]) => t.at >= a && t.end <= b));
+  const firstLetter = line.search(/[A-Za-z]/);
+
+  // A bare integer sitting before the name — "3 strips 150".
+  if (qty === null && all.length && firstLetter > 0
+      && all[0].end <= firstLetter && !all[0].money
+      && all[0].val > 0 && all[0].val < 10000){
+    qty = all.shift().val;
+  }
+
+  let unit = null, amount = null;
+  const tail = all.slice(-3);
+  if (tail.length >= 3){
+    const [a,b,c] = tail;
+    if (qty === null && !a.money) qty = a.val;
+    unit = b.val; amount = c.val;
+  } else if (tail.length === 2){
+    const [a,b] = tail;
+    if (qty === null && !a.money && a.val < 10000){ qty = a.val; unit = b.val; }
+    else { unit = a.val; amount = b.val; }
+  } else if (tail.length === 1){
+    unit = tail[0].val;
+  }
+
+  // The name is whatever is left once the numbers we used are taken out.
+  const spans = [...cut, ...numTokens(line).filter(t => t.free).map(t => [t.at, t.end])]
+    .sort((a,b) => b[0] - a[0]);
+  let name = line;
+  for (const [a,b] of spans) name = name.slice(0,a) + ' ' + name.slice(b);
+  name = name.replace(/[₱$]|php\b/gi,' ')
+             .replace(/\s*[-–—:|.]{2,}\s*/g,' ')
+             .replace(/\s+/g,' ')
+             .replace(/^[\s\-–—:|.,]+|[\s\-–—:|.,]+$/g,'')
+             .trim();
+  if (name.length < 2 || !/[A-Za-z]/.test(name)) return null;
+  // No quantity and no figure means a letterhead or a footer, not a line item.
+  if (qty === null && unit === null && amount === null) return null;
+
+  return { name, qty, unit, amount };
+}
+
+function parseScan(text){
+  return String(text || '').split('\n').map(parseLine).filter(Boolean);
+}
+
+/* ------------------------------------------------- matching to an item --- */
+const normName = v => String(v || '').toLowerCase()
+  .replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
+
+function lev(a, b){
+  const m = a.length, n = b.length;
+  if (!m || !n) return Math.max(m, n);
+  let prev = Array.from({length:n+1}, (_,j) => j), cur = new Array(n+1);
+  for (let i = 1; i <= m; i++){
+    cur[0] = i;
+    for (let j = 1; j <= n; j++)
+      cur[j] = Math.min(prev[j]+1, cur[j-1]+1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+    [prev, cur] = [cur, prev];
+  }
+  return prev[n];
+}
+function matchItem(name){
+  const n = normName(name);
+  if (!n) return null;
+  let best = null;
+  for (const it of items()){
+    const c = normName(it.name);
+    if (!c) continue;
+    let score;
+    if (c === n) score = 1;
+    else if (c.includes(n) || n.includes(c)) score = 0.82;
+    else {
+      const A = new Set(n.split(' ')), B = new Set(c.split(' '));
+      const inter = [...A].filter(x => B.has(x)).length;
+      const jac = inter / new Set([...A, ...B]).size;
+      score = Math.max(jac, 1 - lev(n, c) / Math.max(n.length, c.length));
+    }
+    if (!best || score > best.score) best = { item:it, score };
+  }
+  return best && best.score >= 0.55 ? best : null;
+}
+
+/* =====================================================================
+   Scan a photo — pick, read, check, save
+   ===================================================================== */
+const DEST = {
+  restock:{ label:'Restock',   money:'Cost',       qtyLab:'Qty' },
+  items  :{ label:'New items', money:'Price',      qtyLab:'Stock' },
+  sale   :{ label:'Sale',      money:'Price each', qtyLab:'Qty' },
+};
+
+/* Which figure on the line is the unit price. A tally reading "3 strips 150"
+   means 150 for the three, not 150 each — and the item's own price is what
+   tells us which reading was meant. */
+function unitPrice(row, item){
+  if (row.raw.amount != null && row.raw.qty) return n2(row.raw.amount / row.raw.qty);
+  if (row.raw.unit == null) return item ? n2(item.price) : 0;
+  const q = row.raw.qty || 1;
+  if (item && q > 1){
+    const asEach  = Math.abs(row.raw.unit - item.price);
+    const asTotal = Math.abs(row.raw.unit / q - item.price);
+    if (asTotal < asEach) return n2(row.raw.unit / q);
+  }
+  return n2(row.raw.unit);
+}
+
+function scanSheet(startDest){
+  let dest = startDest || 'restock';
+  let rows = [], conf = 0, shotUrl = null, busy = false, updateCosts = false;
+
+  const body = el('div',{});
+  const foot = el('div',{style:'display:flex;gap:10px;width:100%'});
+  const file = el('input',{ type:'file', accept:'image/*', hidden:true,
+    onchange: e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) read(f); } });
+
+  const h = openSheet({
+    title:'Scan a photo', sub:shop()?.name, body, foot,
+    onClose: () => { if (shotUrl) URL.revokeObjectURL(shotUrl); },
+  });
+  pick();
+
+  /* ---------------------------------------------------------- stage 1 --- */
+  function pick(){
+    const zone = el('div',{class:'drop',
+      onclick:() => file.click(),
+      ondragover:e => { e.preventDefault(); zone.classList.add('hot'); },
+      ondragleave:() => zone.classList.remove('hot'),
+      ondrop:e => { e.preventDefault(); zone.classList.remove('hot');
+        const f = e.dataTransfer?.files?.[0]; if (f) read(f); }},
+      el('div',{class:'ic'}, icon('camera')),
+      el('h3',{text:'Take a photo, or choose one'}),
+      el('p',{text:'A delivery receipt, a price list, or the day written on paper. Lay it flat, fill the frame, keep the light even.'}));
+    fill(body, file, zone,
+      el('p',{style:'margin:14px 2px 0;font-size:11.5px;color:var(--muted-2);line-height:1.45;letter-spacing:-.017em',
+        text:'The reading happens on this device. The photo is never uploaded, and nothing is saved until you have checked it.'}));
+    fill(foot, el('button',{class:'btn btn-ghost', style:'flex:1', onclick:() => h.close()}, 'Cancel'),
+               el('button',{class:'btn btn-accent', style:'flex:1', onclick:() => file.click()},
+                  icon('camera'), 'Choose photo'));
+  }
+
+  /* ---------------------------------------------------------- stage 2 --- */
+  async function read(f){
+    if (busy) return;
+    busy = true;
+    if (shotUrl) URL.revokeObjectURL(shotUrl);
+    shotUrl = URL.createObjectURL(f);
+    const bar = el('i',{style:'width:6%'});
+    const lab = el('div',{class:'prog-lab', text:'Getting ready…'});
+    fill(body, file,
+      el('div',{class:'shot'}, el('img',{src:shotUrl, alt:'The photo being read'})),
+      el('div',{class:'prog'}, bar), lab);
+    fill(foot, el('button',{class:'btn btn-ghost btn-block', onclick:() => h.close()}, 'Cancel'));
+    try{
+      const img = await fileToImage(f);
+      const canvas = prepPhoto(img);
+      const { text, confidence } = await readPhoto(canvas,
+        pr => { bar.style.width = Math.max(6, Math.round(pr*100)) + '%'; },
+        st => { lab.textContent = st; });
+      URL.revokeObjectURL(img.src);
+      conf = confidence;
+      rows = parseScan(text).map(r => ({
+        on:true, name:r.name, qty:r.qty, raw:{ qty:r.qty, unit:r.unit, amount:r.amount },
+      }));
+      // A list with quantities is a delivery; one with only prices is a price
+      // list. Coming from the Sales view is an explicit choice, so leave it.
+      if (startDest !== 'sale' && rows.length){
+        const withQty = rows.filter(r => r.raw.qty != null).length;
+        dest = withQty * 2 >= rows.length ? 'restock' : 'items';
+      }
+      bar.style.width = '100%';
+      busy = false;
+      review();
+    }catch(e){
+      busy = false;
+      console.error(e);
+      fill(body, file,
+        el('div',{class:'scan-note bad'}, icon('alert'),
+          el('span',{text:e.message || 'That photo could not be read.'})));
+      fill(foot, el('button',{class:'btn btn-ghost', style:'flex:1', onclick:() => h.close()}, 'Close'),
+                 el('button',{class:'btn btn-accent', style:'flex:1', onclick:pick}, 'Try again'));
+    }
+  }
+
+  /* ---------------------------------------------------------- stage 3 --- */
+  function resolve(){
+    for (const r of rows){
+      const m = matchItem(r.name);
+      r.match = m?.item || null;
+      r.qty = r.raw.qty;
+      if (dest === 'sale'){
+        r.price = unitPrice(r, r.match);
+        r.hint = (r.raw.unit != null && r.raw.qty > 1 && n2(r.price) !== n2(r.raw.unit))
+          ? `read as ${money(r.raw.unit)} for ${qty(r.raw.qty)}` : null;
+        if (!r.qty) r.qty = 1;
+      } else {
+        r.price = r.raw.unit != null ? n2(r.raw.unit)
+                : (r.raw.amount != null && r.raw.qty ? n2(r.raw.amount / r.raw.qty) : 0);
+        r.hint = null;
+      }
+      if (dest === 'sale' && (!r.match || n2(r.match.stock) <= 0)) r.on = false;
+      // Barely-readable photos throw up phantom lines. Let him tick those on
+      // deliberately rather than leave them one careless tap from saving.
+      if (conf < 45) r.on = false;
+    }
+  }
+
+  /* What this line will really move. The summary, the warning and the save
+     all read it, so the figure on the button is the figure that gets saved. */
+  function sellable(r){
+    const q = n2(r.qty) || 0;
+    if (dest !== 'sale' || !r.match) return q;
+    return Math.max(0, Math.min(q, n2(r.match.stock)));
+  }
+
+  function review(){
+    resolve();
+    const low = conf < 55, meh = conf >= 55 && conf < 78;
+
+    if (!rows.length){
+      fill(body, file,
+        el('div',{class:'shot'}, el('img',{src:shotUrl, alt:'The photo'})),
+        el('div',{class:'scan-note bad'}, icon('alert'),
+          el('span',{text: low
+            ? 'Nothing readable came off that photo — too dark, blurred or angled. A flatter, brighter shot usually fixes it.'
+            : 'The text came through, but no line looked like an item. Photograph just the list itself, without the rest of the page.'})));
+      fill(foot, el('button',{class:'btn btn-ghost', style:'flex:1', onclick:() => h.close()}, 'Close'),
+                 el('button',{class:'btn btn-accent', style:'flex:1', onclick:pick}, 'Another photo'));
+      return;
+    }
+
+    const seg = el('div',{class:'seg', style:'margin-bottom:14px'},
+      ...Object.entries(DEST).map(([k,v]) =>
+        el('button',{ 'aria-pressed':String(dest===k), onclick:() => { dest = k; review(); } }, v.label)));
+
+    const head = el('div',{class:'pl', style:'padding:0 0 7px;box-shadow:none'},
+      el('span',{}),
+      el('span',{style:'font-size:11px;color:var(--muted);text-align:center', text:DEST[dest].qtyLab}),
+      el('span',{style:'font-size:11px;color:var(--muted)', text:'Item'}),
+      el('span',{style:'font-size:11px;color:var(--muted);text-align:right', text:DEST[dest].money}));
+
+    const list = el('div',{}), costBox = el('div',{});
+    const save = el('button',{class:'btn btn-accent', style:'flex:1.4', onclick:commit}, 'Save');
+
+    const sum = () => {
+      const on = rows.filter(r => r.on && r.name.trim());
+      let txt = 'Save';
+      if (dest === 'restock'){
+        const units = on.reduce((t,r) => t + (Number(r.qty)||0), 0);
+        const made  = on.filter(r => !r.match).length;
+        txt = `Add ${qty(units)} to stock` + (made ? ` · ${made} new` : '');
+      } else if (dest === 'items'){
+        const made = on.filter(r => !r.match).length, upd = on.length - made;
+        txt = [made ? `${made} new item${made>1?'s':''}` : null,
+               upd  ? `${upd} price${upd>1?'s':''} updated` : null].filter(Boolean).join(' · ') || 'Save';
+      } else {
+        const sell = on.filter(r => r.match && sellable(r) > 0);
+        const total = sell.reduce((t,r) => t + sellable(r)*(Number(r.price)||0), 0);
+        txt = 'Save sale · ' + money(total);
+        save.textContent = txt;
+        save.disabled = !sell.length;
+        return;
+      }
+      save.textContent = txt;
+      save.disabled = !on.length;
+    };
+
+    const draw = () => {
+      fill(list, ...rows.map(r => {
+        const blocked = dest === 'sale' && !r.match;
+        const line = el('div',{class:'pl' + (r.on ? '' : ' off')},
+          el('button',{class:'pl-tick', 'aria-pressed':String(!!r.on),
+            'aria-label':'Include ' + r.name, disabled:blocked || null,
+            onclick:() => { r.on = !r.on; draw(); }}, icon('check')),
+          el('input',{class:'num', type:'number', inputmode:'decimal', step:'1',
+            value: r.qty ?? '', placeholder: dest === 'items' ? '0' : '1',
+            oninput:e => { r.qty = e.target.value === '' ? null : n2(e.target.value); sum(); }}),
+          el('input',{class:'pl-name', value:r.name,
+            oninput:e => { r.name = e.target.value;
+              r.match = matchItem(r.name)?.item || null; draw(); }}),
+          el('input',{class:'num', type:'number', inputmode:'decimal', step:'0.01',
+            value: r.price ?? '', placeholder:'0.00',
+            oninput:e => { r.price = n2(e.target.value); sum(); }}));
+        const bits = [];
+        if (blocked) bits.push(el('span',{class:'tag out', text:'not one of your items'}));
+        else if (r.match) bits.push(el('span',{class:'tag ok', text:'→ ' + r.match.name}));
+        else bits.push(el('span',{class:'tag violet', text:'new item'}));
+        if (r.hint) bits.push(el('span',{text:r.hint}));
+        if (dest === 'sale' && r.match && (n2(r.qty) || 0) > n2(r.match.stock))
+          bits.push(el('span',{class:'tag low',
+            text: n2(r.match.stock) <= 0 ? 'none in stock'
+                : `only ${qty(r.match.stock)} in stock — selling ${qty(r.match.stock)}`}));
+        line.append(el('div',{class:'pl-hint'}, ...bits));
+        return line;
+      }));
+
+      const changed = dest === 'restock' && rows.some(r =>
+        r.on && r.match && r.price != null && n2(r.price) !== n2(r.match.cost));
+      fill(costBox, changed
+        ? el('label',{style:'display:flex;gap:9px;align-items:flex-start;margin-top:15px;font-size:12.5px;color:var(--muted);line-height:1.4;letter-spacing:-.017em'},
+            el('input',{type:'checkbox', checked:updateCosts || null, style:'margin-top:2px',
+              onchange:e => { updateCosts = e.target.checked; }}),
+            el('span',{text:'This receipt disagrees with the cost you have recorded. Update those costs too.'}))
+        : null);
+      sum();
+    };
+
+    fill(foot, el('button',{class:'btn btn-ghost', style:'flex:1', onclick:pick}, 'Retake'), save);
+    fill(body, file,
+      el('div',{class:'shot'},
+        el('img',{src:shotUrl, alt:'The photo that was read'}),
+        el('button',{class:'redo', onclick:pick}, icon('camera'), 'Retake')),
+      low || meh
+        ? el('div',{class:'scan-note ' + (low ? 'warn' : 'ok')}, icon(low ? 'alert' : 'scan'),
+            el('span',{text: conf < 45
+              ? 'That photo barely read at all. Nothing is ticked — check each line and tick what is right, or take a better photo.'
+              : low ? 'That photo read poorly, so check every line before saving.'
+                    : 'Read cleanly. Still worth a glance before you save.'}))
+        : null,
+      seg, head, list, costBox);
+    draw();
+  }
+
+  /* ----------------------------------------------------------- saving --- */
+  async function commit(){
+    const on = rows.filter(r => r.on && r.name.trim());
+    if (!on.length) return;
+    const btn = foot.querySelector('.btn-accent');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const now = new Date().toISOString();
+    try{
+      if (dest === 'sale'){
+        const saleId = uid(), lines = [], moves = [];
+        for (const r of on){
+          const it = r.match; if (!it) continue;
+          const q = sellable(r);
+          if (q <= 0) continue;
+          lines.push({ id:uid(), sale_id:saleId, item_id:it.id, name:it.name,
+                       qty:q, price:n2(r.price) || 0, cost:n2(it.cost) });
+          moves.push({ id:uid(), item_id:it.id, sale_id:saleId, delta:-q,
+                       reason:'sale', note:'From a photo', created_at:now });
+        }
+        if (!lines.length) throw new Error('There is no stock left on any of those lines.');
+        const gross = lines.reduce((t,l) => t + l.qty*l.price, 0);
+        const cost  = lines.reduce((t,l) => t + l.qty*l.cost, 0);
+        await db.addSale({ id:saleId, shop_id:UI.shop, sold_at:now, discount:0,
+          payment:payments()[0], note:'From a photo',
+          total:n2(gross), profit:n2(gross - cost) }, lines, moves);
+        h.close(); await refresh();
+        toast('Sale saved · ' + money(gross));
+        return;
+      }
+
+      let made = 0, restocked = 0, priced = 0;
+      for (const r of on){
+        const q = n2(r.qty) || 0;
+        const val = r.price == null ? 0 : n2(r.price);
+        if (r.match){
+          if (dest === 'items'){ await db.updateItem(r.match.id, { price:val }); priced++; }
+          else {
+            if (q > 0){
+              await db.addMovements([{ id:uid(), item_id:r.match.id, sale_id:null,
+                delta:q, reason:'restock', note:'From a photo', created_at:now }]);
+              restocked += q;
+            }
+            if (updateCosts && val && n2(val) !== n2(r.match.cost))
+              await db.updateItem(r.match.id, { cost:val });
+          }
+        } else {
+          const id = uid();
+          const newId = await db.addItem({ id, shop_id:UI.shop, name:r.name.trim(),
+            sku:null, category:null,
+            cost:  dest === 'restock' ? val : 0,
+            price: dest === 'items'   ? val : 0,
+            reorder_at:null, archived:false, created_at:now, updated_at:now });
+          made++;
+          if (q > 0) await db.addMovements([{ id:uid(), item_id:newId || id, sale_id:null,
+            delta:q, reason:'opening', note:'From a photo', created_at:now }]);
+        }
+      }
+      h.close(); await refresh();
+      const bits = [];
+      if (restocked) bits.push(`${qty(restocked)} added to stock`);
+      if (made)      bits.push(`${made} new item${made>1?'s':''}`);
+      if (priced)    bits.push(`${priced} price${priced>1?'s':''} updated`);
+      toast(bits.join(' · ') || 'Saved');
+      // A delivery receipt carries cost, never a selling price.
+      if (made && dest === 'restock')
+        setTimeout(() => toast(`Set a selling price for the ${made} new item${made>1?'s':''}`), 2900);
+    }catch(e){
+      fail(e);
+      btn.disabled = false;
+      btn.textContent = 'Save';
+    }
+  }
 }
 
 /* =====================================================================
@@ -1924,6 +2558,8 @@ function wire(){
     UI.salesRange = b.dataset.range; saveUI(); renderSales(); }));
   $$('#repRange .pill').forEach(b => b.addEventListener('click', () => {
     UI.repRange = b.dataset.range; saveUI(); renderReports(); }));
+  $('#salesScan').addEventListener('click', () => scanSheet('sale'));
+  $('#invScan').addEventListener('click', () => scanSheet('restock'));
   $('#repCsv').addEventListener('click', exportCsv);
   $('#repPrint').addEventListener('click', () => window.print());
 

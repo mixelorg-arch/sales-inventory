@@ -21,12 +21,45 @@ It is one HTML file. No build step, no npm, no framework.
   arrives or leaves as a *movement* — opening, restock, sale or count — so the
   number on screen always has a history behind it. Void a sale and the items go
   back on the shelf.
+* **From a photo.** Point the camera at a delivery receipt, a price list or
+  the day written on paper, and the lines come back as rows you check and
+  correct before anything is saved. It works out for itself whether it is
+  looking at a delivery (quantities) or a price list (prices only), matches
+  names against what you already stock, and reads "3 strips 150" as three at
+  fifty rather than three at a hundred and fifty. See below for what it is
+  good at and what it is not.
 * **Reports** for today, the week, the month, the year or all time: revenue,
   profit, units, best sellers, how people paid. Print it, or export the CSV.
 * **Light and dark**, following the phone or forced either way.
 * **Built for the phone.** Laid out against an iPhone 16 Pro (402 pt) and
   16 Pro Max (440 pt) — safe areas, bottom nav, sheets that slide up. On a
   desktop it grows an icon rail and a wider grid.
+
+## What the photo reading can and cannot do
+
+The text is read by Tesseract, in this browser. Nothing is uploaded, it costs
+nothing per photo, and after the first scan the language data is cached so it
+works offline. The first scan downloads about 4 MB.
+
+Measured on a simulated phone photo — angled, unevenly lit, noisy — it read the
+receipt **perfectly**. On a blurred, faded one it read essentially nothing, and
+no amount of cleaning up the image rescued it. Two things follow, and both are
+built in:
+
+* **It tells you when a photo was poor** instead of handing you plausible
+  nonsense. Below 45% confidence nothing arrives ticked — you tick what is
+  right, or take a better photo.
+* **Nothing saves without your say-so.** Every line is editable, every line has
+  a tick, and the button tells you exactly what is about to happen — including
+  capping a sale to the stock you actually have, so the total on the button is
+  the total that gets saved.
+
+For the best read: lay the paper flat, fill the frame with just the list, and
+keep the light even. Glare and a steep angle hurt more than poor handwriting.
+
+The images are deliberately only downscaled and desaturated before reading.
+Thresholding them first was measurably worse — 69.6% against 100% — because
+Tesseract binarises better on its own.
 
 ## Setting it up
 
