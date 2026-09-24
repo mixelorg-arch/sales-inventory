@@ -63,37 +63,79 @@ Tesseract binarises better on its own.
 
 ## Setting it up
 
-**1. Create the tables.** Open the Supabase dashboard → **SQL Editor**, paste
-all of [`supabase/schema.sql`](supabase/schema.sql), and run it. It is safe to
-run twice. Everything it makes is prefixed `salesinv_`, so it sits beside the
-other projects in this database without touching them.
+**1. Make the tables.** Supabase dashboard → **SQL Editor**, paste all of
+[`supabase/schema.sql`](supabase/schema.sql) and run it. It is safe to run over
+an existing database — that is how you upgrade it — and everything it makes is
+prefixed `salesinv_`, so it sits beside the other projects here untouched.
 
-**2. Create yourself a user.** Dashboard → **Authentication → Users → Add
-user**, with a password. There is no sign-up screen on purpose — the only
-people who get in are the ones you add.
+**2. Point the links back at the app.** Dashboard → **Authentication → URL
+Configuration**. Set **Site URL** to `https://mixelorg-arch.github.io/sales-inventory/`
+and add the same address under **Redirect URLs**. Without this, the confirm and
+reset e-mails send you to `localhost` and appear to do nothing.
 
-**3. Open the site and sign in.** The two shops are already there.
+**3. Open the app and choose a password.** The first load asks you to set one.
+That is the whole of the setup — after that the app never asks again on that
+device, and the same password opens it on any other.
+
+**Do step 3 now, before you give the address to anyone.** The page is public, so
+whoever loads it first is offered the chance to set the password. If Supabase's
+**Confirm email** setting is on — leave it on — a stranger who tries gets
+nowhere, because the confirmation link goes to your address, not theirs, and
+setting your own password afterwards simply overwrites the attempt. Leaving it
+on costs you one click on one e-mail, once, the first time.
+
+## The password
+
+One password, no username, no login screen. Change it in **Settings →
+Password**, or press **Forgot it** on the lock screen to have a reset link
+e-mailed to the owner address.
+
+The owner address is `mixel.org@gmail.com`. It is where reset links go, and it
+is the only address the database will show anything to. To use a different one,
+change the seed at the foot of `schema.sql`, or run:
+
+```sql
+update public.salesinv_meta
+   set value = jsonb_build_object('email','you@example.com')
+ where key = 'owner';
+```
+
+Supabase's built-in mail service is rate limited to a handful of messages an
+hour. That is ample for the odd reset; if you ever hit it, add your own SMTP in
+the dashboard.
 
 ## Why the key in `config.js` is safe to have in a public repo
 
 It is a *publishable* key — it is in the page source of every Supabase web app
-and is meant to be read. What protects the numbers is the row level security in
-`schema.sql`:
+and is meant to be read.
 
-* every table is granted to the `authenticated` role only, and `anon` is
-  explicitly revoked from all five;
-* `salesinv_items.stock` is not grantable to the client at all — not on insert,
-  not on update. Only the movements trigger writes it.
+**The password is not checked in this page.** It could not be: anyone can read
+the page source. It is a real credential that Supabase verifies, and what
+protects the figures is the row level security in `schema.sql`:
 
-That was checked, not assumed: the schema was run on a scratch Postgres 17 with
-Supabase-like roles and default grants, and **24 assertions pass** — anon is
-refused on every table, a signed-in client cannot set `stock` by hand, the
-trigger arithmetic is right for insert, update and delete, and voiding a sale
-puts the exact stock back.
+* every policy demands not merely a signed-in visitor but *the owner* — the
+  address on the token has to match the one held in `salesinv_meta`. Signing up
+  is open, so that the app can set its own password on first run; anyone else
+  who signs up gets an account that sees nothing at all.
+* `anon` is revoked from every data table. The only thing a stranger can read
+  anywhere is two rows of `salesinv_meta` — whether a password has been set and
+  which address it belongs to — because the lock screen has to know which
+  question to ask before anybody is signed in. Neither row opens anything.
+* `salesinv_items.stock` is not grantable to the client at all, on insert or on
+  update. Only the movements trigger writes it.
+
+Checked, not assumed. The schema runs on a scratch Postgres 17 with
+Supabase-like roles and default grants, and **34 assertions pass**: a signed-in
+stranger reads zero rows from all six tables and their attempts to seize
+ownership, rewrite prices or delete the shops change zero rows; `anon` is
+refused outright on all five data tables and can neither write the two rows it
+can read nor call the ownership function; the stock column resists being
+written by hand; and the trigger arithmetic is right for insert, update and
+delete, with a voided sale putting the exact stock back.
 
 ## If Supabase is unreachable
 
-Press **Use this device only** on the sign-in screen and the app runs on
+Press **Use this device only** on the lock screen and the app runs on
 `localStorage` with the same two shops. Nothing leaves the browser. Settings →
 **Download backup** writes a JSON file; **Restore** reads one back.
 
@@ -106,7 +148,7 @@ fallback and a sandbox, not an offline mirror that syncs later.
 |---|---|
 | `index.html` | the whole app — styles, markup, logic |
 | `config.js` | Supabase URL, publishable key, table prefix |
-| `supabase/schema.sql` | tables, trigger, grants, policies, seed |
+| `supabase/schema.sql` | tables, trigger, grants, owner policies, seed |
 
 ## The data
 
@@ -116,6 +158,7 @@ salesinv_items       cost, price, sku, category, stock, reorder level
 salesinv_sales       total, profit, discount, payment, note
 salesinv_sale_lines  one row per item on a sale, with its price and cost
 salesinv_movements   every change in stock, and what caused it
+salesinv_meta        who owns this shop book, and whether a password is set
 ```
 
 Sales keep their own copy of each item's name, price and cost, so deleting an

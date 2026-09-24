@@ -845,6 +845,17 @@ button.row:active{background:var(--surface-sunk)}
         </div>
       </div>
 
+      <div class="card" id="pwCard">
+        <div class="card-head"><h2>Password</h2><span class="sub" id="pwWho"></span></div>
+        <p style="margin:0 0 14px;font-size:13px;color:var(--muted);letter-spacing:-.017em;line-height:1.45">
+          One password opens this shop book anywhere. Change it and the devices
+          already open stay open — anywhere else will ask for the new one.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-ink" id="pwChange"><svg><use href="#i-edit"/></svg>Change password</button>
+          <button class="btn btn-ghost" id="pwReset">Email me a reset link</button>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-head"><h2>Backup</h2></div>
         <p style="margin:0 0 14px;font-size:13px;color:var(--muted);letter-spacing:-.017em;line-height:1.4">
@@ -898,7 +909,8 @@ button.row:active{background:var(--surface-sunk)}
 
 const CFG = window.SALESINV_CONFIG || {};
 const T   = n => (CFG.tablePrefix || 'salesinv_') + n;
-const LS  = { data:'salesinv.local.v1', mode:'salesinv.mode', ui:'salesinv.ui.v1', theme:'salesinv.theme' };
+const LS  = { data:'salesinv.local.v1', mode:'salesinv.mode', ui:'salesinv.ui.v1',
+              theme:'salesinv.theme', setup:'salesinv.setupmarked' };
 
 /* ----------------------------------------------------------------- dom ---- */
 const $  = s => document.querySelector(s);
@@ -1529,11 +1541,14 @@ function renderSettings(){
 
   const remote = db?.mode === 'remote';
   $('#verLine').textContent = remote
-    ? `Signed in as ${session?.user?.email || 'a user'} · syncing with Supabase`
+    ? `Unlocked · syncing with Supabase as ${ownerEmail || session?.user?.email || 'the owner'}`
     : 'On-device mode · nothing leaves this browser';
   $('#impJson').hidden = remote;
+  $('#pwCard').hidden = !remote;
+  $('#pwWho').textContent = remote ? (ownerEmail || '') : '';
   $('#wipe').textContent = '';
-  $('#wipe').append(icon('trash'), document.createTextNode(remote ? 'Sign out' : 'Erase everything'));
+  $('#wipe').append(icon('trash'), document.createTextNode(
+    remote ? 'Forget the password on this device' : 'Erase everything'));
   $('#wipe').className = 'btn ' + (remote ? 'btn-ghost' : 'btn-danger');
 }
 
@@ -2442,55 +2457,191 @@ function applyTheme(t){
 }
 
 /* =====================================================================
-   Sign in. There is no sign-up on purpose — users are made by hand in the
-   Supabase dashboard, under Authentication → Users.
+   The lock.
+
+   One password opens this shop book on any device, and this is the only
+   screen that ever asks for it.
+
+   Underneath it is still a real Supabase account — the password is a
+   credential the database checks, never a comparison made in this page.
+   That distinction is the whole point: config.js sits in a public repo, so
+   a check made here would be worth nothing at all. What keeps the figures
+   private is the row level security in schema.sql, which lets exactly one
+   e-mail address see anything. The address, and the password, are the lock.
    ===================================================================== */
-function signInScreen(problem){
-  const email = input({ type:'email', placeholder:'you@example.com', autocomplete:'username' });
-  const pass  = input({ type:'password', placeholder:'Password', autocomplete:'current-password' });
-  const msg   = el('p',{ style:'margin:2px 2px 10px;font-size:13px;color:var(--bad);min-height:18px',
-                         text:problem || '' });
-  const go    = el('button',{class:'btn btn-accent btn-block', onclick:submit}, 'Sign in');
+
+/* Captured before the Supabase client starts, because it consumes the hash. */
+const RECOVERY = /[#&?]type=recovery/.test(location.hash + location.search);
+let ownerEmail = null;
+
+async function readGate(){
+  const { data, error } = await sb.from(T('meta')).select('key,value').in('key', ['setup','owner']);
+  if (error) throw error;
+  const m = Object.fromEntries((data || []).map(r => [r.key, r.value || {}]));
+  ownerEmail = m.owner?.email || null;
+  return { setupDone: !!m.setup?.done, ownerEmail };
+}
+
+/* So the next visit knows to ask for the password rather than offer to set
+   one. Written once per device; a failure here is not worth interrupting. */
+async function markSetupDone(){
+  if (localStorage.getItem(LS.setup) === '1') return;
+  try{
+    await sb.from(T('meta')).upsert({ key:'setup', value:{ done:true },
+      updated_at:new Date().toISOString() });
+    localStorage.setItem(LS.setup, '1');
+  }catch(e){ console.warn('Could not record that the password is set.', e); }
+}
+
+const MIN_PW = 8;
+
+function lockScreen(mode, problem){
   const scrim = el('div',{class:'scrim', style:'align-items:center;padding:20px'});
-  const card  = el('div',{class:'sheet', style:'border-radius:var(--r-card);max-width:420px;padding:26px 24px calc(env(safe-area-inset-bottom) + 24px)'},
-    el('div',{style:'display:flex;align-items:center;gap:11px;margin-bottom:18px'},
+  const box   = el('div',{});
+  const card  = el('div',{class:'sheet',
+    style:'border-radius:var(--r-card);max-width:420px;padding:26px 24px calc(env(safe-area-inset-bottom) + 24px)'},
+    el('div',{style:'display:flex;align-items:center;gap:11px;margin-bottom:16px'},
       el('span',{class:'brand-mark'}, icon('store')),
       el('div',{}, el('h2',{style:'font-size:21px', text:'Sales & Inventory'}),
-        el('div',{class:'sub', style:'font-size:12px;color:var(--muted);margin-top:2px',
-                  text:'Project Drex · Mixel'}))),
-    field('Email', email), field('Password', pass), msg, go,
-    el('button',{class:'btn btn-ghost btn-block', style:'margin-top:10px', onclick:async () => {
-      scrim.remove(); document.body.style.overflow=''; await startLocal();
-      toast('Working on this device only');
-    }}, 'Use this device only'));
+        el('div',{style:'font-size:12px;color:var(--muted);margin-top:2px', text:'Project Drex · Mixel'}))),
+    box);
   scrim.append(card);
   $('#sheetHost').append(scrim);
   document.body.style.overflow = 'hidden';
-  setTimeout(() => email.focus(), 150);
-  pass.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  const close = () => { scrim.remove(); document.body.style.overflow = ''; };
+  draw(mode, problem);
 
-  async function submit(){
-    msg.textContent = '';
-    if (!email.value.trim() || !pass.value) { msg.textContent = 'Both fields, please.'; return; }
-    go.disabled = true; go.textContent = 'Signing in…';
-    const { data, error } = await sb.auth.signInWithPassword(
-      { email:email.value.trim(), password:pass.value });
-    if (error){
-      msg.textContent = error.message || 'That did not work.';
-      go.disabled = false; go.textContent = 'Sign in';
+  function lead(t){
+    return el('p',{style:'margin:0 2px 16px;font-size:13px;color:var(--muted);line-height:1.5;letter-spacing:-.017em', text:t});
+  }
+  function offline(){
+    return el('button',{class:'btn btn-ghost btn-block', style:'margin-top:10px', onclick:async () => {
+      close(); await startLocal(); toast('Working on this device only');
+    }}, 'Use this device only');
+  }
+
+  function draw(m, note){
+    const msg = el('p',{style:'margin:2px 2px 10px;font-size:13px;color:var(--bad);min-height:18px', text:note || ''});
+
+    if (m === 'sent'){
+      fill(box, lead(`A reset link is on its way to ${ownerEmail}. Open it on the device you want to use and you can choose a new password there.`),
+        el('button',{class:'btn btn-ink btn-block', onclick:() => draw('unlock')}, 'Back'));
       return;
     }
-    session = data.session;
+    if (m === 'confirm'){
+      fill(box, lead(`Almost there. Open the message just sent to ${ownerEmail} and click the link to confirm the address — then come back here and enter the password you chose.`),
+        el('button',{class:'btn btn-ink btn-block', onclick:() => draw('unlock')}, 'I have confirmed it'));
+      return;
+    }
+    if (m === 'error'){
+      fill(box, lead(note || 'Something went wrong reaching Supabase.'),
+        el('button',{class:'btn btn-accent btn-block', onclick:() => location.reload()}, 'Try again'),
+        offline());
+      return;
+    }
+
+    const setting = (m === 'setup' || m === 'recover');
+    const pw  = input({ type:'password', placeholder:'Password',
+      autocomplete: setting ? 'new-password' : 'current-password' });
+    const pw2 = setting ? input({ type:'password', placeholder:'The same again', autocomplete:'new-password' }) : null;
+    const go  = el('button',{class:'btn btn-accent btn-block', onclick:submit},
+      m === 'setup' ? 'Set password' : m === 'recover' ? 'Save new password' : 'Open');
+
+    fill(box,
+      lead(m === 'setup'
+        ? `Choose a password. It opens this shop book on any phone or computer, and you will not be asked again on a device once you have entered it. It belongs to ${ownerEmail || 'the owner address'}, which is where a reset link goes if you forget it.`
+        : m === 'recover'
+        ? 'Choose a new password. Every device that was already open stays open; anywhere else will ask for the new one.'
+        : 'Enter the password for this shop book.'),
+      field(m === 'unlock' ? 'Password' : 'New password', pw),
+      pw2 ? field('Confirm', pw2) : null,
+      msg, go,
+      m === 'unlock'
+        ? el('button',{class:'btn btn-ghost btn-block', style:'margin-top:10px', onclick:reset},
+            'Forgot it — email me a reset link')
+        : null,
+      m === 'recover' ? null : offline());
+
+    setTimeout(() => pw.focus(), 150);
+    (pw2 || pw).addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+
+    async function reset(){
+      if (!ownerEmail) return;
+      msg.textContent = '';
+      try{
+        const { error } = await sb.auth.resetPasswordForEmail(ownerEmail,
+          { redirectTo: location.origin + location.pathname });
+        if (error) throw error;
+        draw('sent');
+      }catch(e){ msg.textContent = e.message || 'The reset link could not be sent.'; }
+    }
+
+    async function submit(){
+      msg.textContent = '';
+      if (!pw.value) return void (msg.textContent = 'Enter the password.');
+      if (setting && pw.value.length < MIN_PW)
+        return void (msg.textContent = `Make it at least ${MIN_PW} characters.`);
+      if (pw2 && pw.value !== pw2.value)
+        return void (msg.textContent = 'Those two do not match.');
+      if (!ownerEmail && m !== 'recover')
+        return void (msg.textContent = 'No owner address is set in the database. Run supabase/schema.sql.');
+
+      const was = go.textContent;
+      go.disabled = true; go.textContent = 'One moment…';
+      try{
+        if (m === 'setup'){
+          const { data, error } = await sb.auth.signUp({ email:ownerEmail, password:pw.value });
+          if (error) throw error;
+          if (!data.session) return draw('confirm');
+          session = data.session;
+        } else if (m === 'recover'){
+          const { error } = await sb.auth.updateUser({ password:pw.value });
+          if (error) throw error;
+          session = (await sb.auth.getSession()).data.session;
+        } else {
+          const { data, error } = await sb.auth.signInWithPassword(
+            { email:ownerEmail, password:pw.value });
+          if (error) throw new Error(/invalid login|credentials/i.test(error.message || '')
+            ? 'That is not the password for this shop book.' : error.message);
+          session = data.session;
+        }
+        await startRemote();
+        await markSetupDone();
+        localStorage.setItem(LS.mode, 'remote');
+        close();
+        // Land on a clean URL so a stale recovery hash cannot fire twice.
+        if (RECOVERY) history.replaceState(null, '', location.pathname);
+        toast(m === 'unlock' ? 'Welcome back' : 'Password set');
+      }catch(e){
+        msg.textContent = e.message || 'That did not work.';
+        go.disabled = false; go.textContent = was;
+      }
+    }
+  }
+}
+
+/* Changing it later, from Settings. */
+function passwordSheet(){
+  const pw  = input({ type:'password', placeholder:'New password', autocomplete:'new-password' });
+  const pw2 = input({ type:'password', placeholder:'The same again', autocomplete:'new-password' });
+  const save = el('button',{class:'btn btn-accent', onclick:commit}, 'Change it');
+  const h = openSheet({
+    title:'Change the password', sub:ownerEmail || '',
+    body:[ el('p',{style:'margin:2px 2px 14px;font-size:13px;color:var(--muted);line-height:1.45;letter-spacing:-.017em',
+             text:'Devices already open stay open. Anywhere else will ask for the new password.'}),
+           field('New password', pw), field('Confirm', pw2) ],
+    foot:[ el('button',{class:'btn btn-ghost', onclick:() => h.close()}, 'Cancel'), save ],
+  });
+  setTimeout(() => pw.focus(), 120);
+  async function commit(){
+    if (pw.value.length < MIN_PW) return toast(`Make it at least ${MIN_PW} characters`, 'bad');
+    if (pw.value !== pw2.value)   return toast('Those two do not match', 'bad');
+    save.disabled = true; save.textContent = 'Saving…';
     try{
-      await startRemote();            // only dismiss once the data is really there
-    }catch(err){
-      msg.textContent = err.message;
-      go.disabled = false; go.textContent = 'Sign in';
-      return;
-    }
-    localStorage.setItem(LS.mode, 'remote');
-    scrim.remove(); document.body.style.overflow = '';
-    toast('Signed in');
+      const { error } = await sb.auth.updateUser({ password:pw.value });
+      if (error) throw error;
+      h.close(); toast('Password changed');
+    }catch(e){ fail(e); save.disabled = false; save.textContent = 'Change it'; }
   }
 }
 
@@ -2579,6 +2730,19 @@ function wire(){
   $$('#themeSeg button').forEach(b => b.addEventListener('click', () => {
     applyTheme(b.dataset.theme); renderSettings(); }));
 
+  $('#pwChange').addEventListener('click', passwordSheet);
+  $('#pwReset').addEventListener('click', async () => {
+    if (!sb || !ownerEmail) return;
+    if (!await ask({ title:'Send a reset link?',
+      text:`A link goes to ${ownerEmail}. Opening it lets you choose a new password.`,
+      ok:'Send it' })) return;
+    try{
+      const { error } = await sb.auth.resetPasswordForEmail(ownerEmail,
+        { redirectTo: location.origin + location.pathname });
+      if (error) throw error;
+      toast('Reset link sent to ' + ownerEmail);
+    }catch(e){ fail(e); }
+  });
   $('#expJson').addEventListener('click', exportJson);
   $('#impJson').addEventListener('click', () => $('#impFile').click());
   $('#impFile').addEventListener('change', e => {
@@ -2588,9 +2752,12 @@ function wire(){
 
   $('#wipe').addEventListener('click', async () => {
     if (db?.mode === 'remote'){
-      if (!await ask({ title:'Sign out?', text:'The shop data stays in Supabase. You will need your password to get back in.', ok:'Sign out' })) return;
+      if (!await ask({ title:'Forget the password here?',
+        text:'Everything stays in Supabase and on your other devices. This browser will ask for the password again next time.',
+        ok:'Forget it' })) return;
       await sb.auth.signOut();
       localStorage.removeItem(LS.mode);
+      localStorage.removeItem(LS.setup);
       location.reload();
       return;
     }
@@ -2635,8 +2802,8 @@ async function startRemote(){
     db = null;
     const m = e?.message || '';
     throw new Error(/schema cache|does not exist|relation/i.test(m)
-      ? 'Signed in, but this Supabase project has no salesinv_ tables yet. Run supabase/schema.sql in the SQL editor, then try again.'
-      : (m || 'Signed in, but the shops would not load.'));
+      ? 'That worked, but this Supabase project has no salesinv_ tables yet. Run supabase/schema.sql in the SQL editor, then try again.'
+      : (m || 'That worked, but the shops would not load.'));
   }
   subscribeRealtime();
 }
@@ -2655,16 +2822,33 @@ async function boot(){
   try{
     const mod = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
     sb = mod.createClient(CFG.supabaseUrl, CFG.supabaseKey,
-      { auth:{ persistSession:true, autoRefreshToken:true } });
-    const { data, error } = await sb.auth.getSession();
-    if (error) throw error;
-    session = data.session;
-    if (!session) return signInScreen();
-    await startRemote();
+      { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } });
+
+    session = (await sb.auth.getSession()).data.session;
+
+    let g = await readGate();
+    // A session that cannot see the gate rows is not the owner's — someone
+    // signed up on this browser with another address. Drop it and ask again.
+    if (session && !g.ownerEmail){
+      await sb.auth.signOut();
+      session = null;
+      g = await readGate();
+    }
+    if (RECOVERY && session) return void lockScreen('recover');
+    if (session){
+      await startRemote();
+      await markSetupDone();
+      return;
+    }
+    lockScreen(g.setupDone ? 'unlock' : 'setup');
   }catch(e){
     console.error(e);
-    if (sb) signInScreen('Could not reach Supabase. Sign in again, or work on this device.');
-    else {
+    const m = e?.message || '';
+    if (sb){
+      lockScreen('error', /schema cache|does not exist|relation/i.test(m)
+        ? 'This Supabase project has no salesinv_ tables yet. Paste supabase/schema.sql into the SQL editor, run it, then try again.'
+        : 'Could not reach Supabase. Try again, or work on this device.');
+    } else {
       await startLocal();
       toast('Offline — working on this device', 'bad');
     }

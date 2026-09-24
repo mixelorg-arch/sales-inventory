@@ -8,12 +8,26 @@
 --  Safe to run more than once: it is idempotent end to end.
 --  Paste it into the Supabase dashboard → SQL Editor → Run.
 --
---  Security model (the same one the photobooth app uses):
---    * RLS on every table, one policy, "to authenticated".
---    * anon is revoked from everything, so the publishable key in config.jsx
---      can sit in a public repo and still return nothing to a stranger.
---    * there is no sign-up screen on purpose — create users by hand in
---      Authentication → Users.
+--  Security model:
+--    * RLS on every table. The policy is not merely "signed in" but "signed in
+--      AS THE OWNER" — the e-mail on the JWT has to match the one held in
+--      salesinv_meta. Anyone else who signs up gets an account that can read
+--      nothing, which is what makes it safe for the app to set its own
+--      password on first run.
+--    * anon is revoked from every data table, so the publishable key in
+--      config.js can sit in a public repo and still hand a stranger nothing.
+--    * anon may read exactly two rows of salesinv_meta — whether a password
+--      has been set, and which address it belongs to — because the unlock
+--      screen has to know which of the two questions to ask before anyone is
+--      signed in. Neither row grants access to anything.
+--
+--  > THE OWNER ADDRESS IS SEEDED BELOW AS mixel.org@gmail.com.
+--    It is the account the password belongs to and where a reset link goes.
+--    For another address, change it in the seed at the foot of this file, or
+--    afterwards with:
+--      update public.salesinv_meta
+--         set value = jsonb_build_object('email','you@example.com')
+--       where key = 'owner';
 -- ============================================================================
 
 -- ---------------------------------------------------------------- tables ---
@@ -79,11 +93,41 @@ create table if not exists public.salesinv_movements (
   created_at timestamptz not null default now()
 );
 
+-- A small key/value table: who this shop book belongs to, and whether the
+-- password has been chosen yet.
+create table if not exists public.salesinv_meta (
+  key        text primary key,
+  value      jsonb       not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
 create index if not exists salesinv_items_shop_idx      on public.salesinv_items(shop_id);
 create index if not exists salesinv_sales_shop_idx      on public.salesinv_sales(shop_id, sold_at desc);
 create index if not exists salesinv_sale_lines_sale_idx on public.salesinv_sale_lines(sale_id);
 create index if not exists salesinv_movements_item_idx  on public.salesinv_movements(item_id, created_at desc);
 create index if not exists salesinv_movements_sale_idx  on public.salesinv_movements(sale_id);
+
+-- ------------------------------------------------------------ who is this ---
+
+-- True only for the one account this shop book belongs to. security definer so
+-- it can read salesinv_meta without tripping that table's own policy, which
+-- calls this function — without it the two recurse.
+create or replace function public.salesinv_is_owner()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.salesinv_meta m
+     where m.key = 'owner'
+       and lower(m.value ->> 'email') = lower(coalesce(auth.jwt() ->> 'email', ''))
+  );
+$$;
+
+revoke all on function public.salesinv_is_owner() from public, anon;
+grant execute on function public.salesinv_is_owner() to authenticated;
 
 -- --------------------------------------------------------------- triggers ---
 
@@ -151,7 +195,8 @@ revoke all on public.salesinv_shops,
               public.salesinv_items,
               public.salesinv_sales,
               public.salesinv_sale_lines,
-              public.salesinv_movements
+              public.salesinv_movements,
+              public.salesinv_meta
   from anon, authenticated, public;
 
 grant select, insert, update, delete on
@@ -160,6 +205,12 @@ grant select, insert, update, delete on
   public.salesinv_sale_lines,
   public.salesinv_movements
   to authenticated;
+
+-- The unlock screen asks one of two questions and must know which before
+-- anybody is signed in, so anon may read — never write — the two rows the
+-- gate policy below allows.
+grant select on public.salesinv_meta to anon;
+grant select, insert, update on public.salesinv_meta to authenticated;
 
 -- Note the missing "stock" in both lists: movements own that column, and a
 -- table-wide insert grant would have covered it, letting a client open an item
@@ -178,19 +229,30 @@ alter table public.salesinv_items      enable row level security;
 alter table public.salesinv_sales      enable row level security;
 alter table public.salesinv_sale_lines enable row level security;
 alter table public.salesinv_movements  enable row level security;
+alter table public.salesinv_meta       enable row level security;
 
+-- Being signed in is not enough. Signing up is open, so that the app can set
+-- its own password on first run — which means a stranger may create an account
+-- whenever they like. They simply get one that sees nothing.
 do $$
 declare t text;
 begin
   foreach t in array array['salesinv_shops','salesinv_items','salesinv_sales',
-                           'salesinv_sale_lines','salesinv_movements']
+                           'salesinv_sale_lines','salesinv_movements','salesinv_meta']
   loop
     execute format('drop policy if exists %I on public.%I', t || '_rw', t);
     execute format(
-      'create policy %I on public.%I for all to authenticated using (true) with check (true)',
+      'create policy %I on public.%I for all to authenticated '
+      'using (public.salesinv_is_owner()) with check (public.salesinv_is_owner())',
       t || '_rw', t);
   end loop;
 end $$;
+
+-- The only thing a stranger may read: whether a password has been set, and the
+-- address it belongs to. Read-only, and only those two keys.
+drop policy if exists salesinv_meta_gate on public.salesinv_meta;
+create policy salesinv_meta_gate on public.salesinv_meta
+  for select to anon using (key in ('setup','owner'));
 
 -- ---------------------------------------------------------------- realtime ---
 -- So a second phone or the till sees a sale the moment it is rung up.
@@ -219,3 +281,14 @@ where not exists (select 1 from public.salesinv_shops where name = 'Project Drex
 insert into public.salesinv_shops (name, sort)
 select 'Mixel', 1
 where not exists (select 1 from public.salesinv_shops where name = 'Mixel');
+
+-- Who this shop book belongs to.
+insert into public.salesinv_meta (key, value)
+select 'owner', jsonb_build_object('email', 'mixel.org@gmail.com')
+where not exists (select 1 from public.salesinv_meta where key = 'owner');
+
+-- Flipped to true by the app the first time the owner gets in, so the unlock
+-- screen knows whether to ask for a new password or for the existing one.
+insert into public.salesinv_meta (key, value)
+select 'setup', jsonb_build_object('done', false)
+where not exists (select 1 from public.salesinv_meta where key = 'setup');
